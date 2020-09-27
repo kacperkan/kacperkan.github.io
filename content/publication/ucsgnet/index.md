@@ -43,7 +43,7 @@ url_video: ''
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder. 
 image:
-  caption: 'Example CSG tree predicted by UCSG-Net '
+  caption: 'Example CSG tree predicted by UCSG-Net'
   focal_point: "TopRight"
   preview_only: false
 
