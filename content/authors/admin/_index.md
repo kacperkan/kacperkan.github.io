@@ -27,6 +27,9 @@ interests:
 
 education:
   courses:
+  - course: PhD (unfinished) with thesis "3D Shape Reconstruction of Objects in the Scene"
+    institution: Wrocław University of Science and Technology
+    year: 2020
   - course: MSc in Computer Science with Data Science specialization
     institution: Wrocław University of Science and Technology
     year: 2019
