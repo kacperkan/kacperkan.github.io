@@ -30,7 +30,7 @@ featured: true
 
 links:
 - name: Project Page
-  url: https://ucsgnet.github.io
+  url: https://kacperkan.github.io/ucsgnet
 url_pdf: https://arxiv.org/abs/2006.09102
 url_code: 'https://github.com/kacperkan/ucsgnet/'
 url_dataset: ''
