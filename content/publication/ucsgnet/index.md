@@ -34,11 +34,11 @@ links:
 url_pdf: https://arxiv.org/abs/2006.09102
 url_code: 'https://github.com/kacperkan/ucsgnet/'
 url_dataset: ''
-url_poster: ''
+url_poster: 'https://github.com/kacperkan/ucsgnet/raw/master/docs/poster.pdf'
 url_project: ''
 url_slides: ''
 url_source: ''
-url_video: ''
+url_video: 'https://www.youtube.com/watch?v=s1p4UHtUG3g&feature=emb_title'
 
 # Featured image
 # To use, add an image named `featured.jpg/png` to your page's folder. 
