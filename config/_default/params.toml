@@ -93,11 +93,11 @@ phone = ""
 
 # Address
 # For country_code, use the 2-letter ISO code (see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 )
-address = {street = "Pl. Politechniki 1", city = "Warsaw", region = "Masovian Voivodeship", postcode = "00-661", country = "Poland", country_code = "PL"}
+address = {street = "Nowowiejska 15/19", city = "Warsaw", region = "Masovian Voivodeship", postcode = "00-665", country = "Poland", country_code = "PL"}
 
 # Geographic coordinates
 # To get your coordinates, right-click on Google Maps and choose "What's here?". The coords will show up at the bottom.
-coordinates = {latitude = "52.220682", longitude = "21.010618"}
+coordinates = {latitude = "52.218904", longitude = "21.009327"}
 
 # Directions for visitors to locate you.
 directions = ""

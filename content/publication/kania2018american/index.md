@@ -3,7 +3,7 @@ title: "American Sign Language Fingerspelling Recognition Using Wide Residual Ne
 authors:
 - admin
 - Urszula Markowska-Kaczmar
-date: "2018-05-11:00:00Z"
+date: "2018-05-11T00:00:00Z"
 doi: "10.1007/978-3-319-91253-0_10"
 
 # Schedule page publish date (NOT publication's date).
