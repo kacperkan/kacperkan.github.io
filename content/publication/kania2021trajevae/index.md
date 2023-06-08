@@ -3,7 +3,7 @@ title: "TrajeVAE: Controllable Human Motion Generation from Trajectories"
 authors:
 - admin
 - Marek Kowalski
-- Tomasz Tzciński
+- Tomasz Trzciński
 date: "2021-11-24T00:00:00Z"
 doi: ""
 

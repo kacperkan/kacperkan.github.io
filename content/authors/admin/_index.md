@@ -30,7 +30,7 @@ education:
   - course: PhD (ongoing) "Low Shot Realistic Human Rendering from Partial Information"
     institution: Warsaw University of Technology 
     year: 
-  - course: PhD (unfinished) "3D Shape Reconstruction of Objects in the Scene"
+  - course: PhD (moved to Warsaw University of Technology) "3D Shape Reconstruction of Objects in the Scene"
     institution: Wrocław University of Science and Technology
     year: 2020
   - course: MSc in Computer Science with Data Science specialization
@@ -73,7 +73,7 @@ user_groups:
 - Visitors
 ---
 
-I am a 2nd year PhD Student at Warsaw University of Technology. The PhD programme is 
+I am a 3nd year PhD Student at Warsaw University of Technology. The PhD programme is 
 financed by Microsoft Research Cambridge. 
 
 My research revolves around 3D human animation and reconstruction in partial information

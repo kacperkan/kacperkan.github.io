@@ -1,0 +1,13 @@
+{
+    "html.format.wrapLineLength": 80,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wrappingIndent": "same",
+    "editor.wordWrapColumn": 80,
+    "diffEditor.wordWrap": "on",
+    "vim.textwidth": 80,
+    "[markdown]": {
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wrappingIndent": "same",
+        "editor.wordWrapColumn": 80,
+    }
+}
