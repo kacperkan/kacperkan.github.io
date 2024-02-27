@@ -2,7 +2,7 @@
 title: Introduction to Artificial Intelligence [PL, WSI-24L-G103, WSI-24L-G104]
 subtitle: Wprowadzenie do Sztucznej Inteligencji
 date: "2024-02-23T00:00:00Z"
-lastmod: "2024-02-23T00:00:00Z"
+lastmod: "2024-02-26T00:00:00Z"
 
 draft: false
 featured: false
@@ -129,6 +129,29 @@ następujących celach:
 ## Zadania
 
 ### Zadanie 1.
+Zaimplementuj metodę gradientu prostego oraz przeprowadź analizę zaimplementowanej metody dla dwóch funkcji:
+- Funkcji Rastrigina dla zakresu $\mathbf{x} \in [-5,12; 5,12], \mathbf{x}\in\mathbb{R}^2$:
+$$
+f(\mathbf{x}) = 10d + \sum^d_{i=1}\left[x^2_i - 10\cos(2\pi x_i)\right],
+$$
+- Funkcji Griewanka dla zakresu $\mathbf{x} \in [-5, 5], \mathbf{x}\in\mathbb{R}^2$
+$$
+f(\mathbf{x}) = \sum^d_{i=1} \frac{x_i^2}{4000} -
+\prod^d_{i=1}\cos\left(\frac{x_i}{\sqrt{i}} \right) +1,
+$$
+gdzie $d$ to liczba wymiarów oraz $d{=}2$.
+
+Eksperymenty powinny zawierać między innymi: testy różnych wartości parametrów
+uczenia ($\beta$, patrz slajdy z wykładu), oraz różne punkty inicjalizacji (blisko optimum, daleko od optimum). W czasie zajęć proszę pokazać zbieżność dla
+funkcji:
+$$
+f(\mathbf{x}) = \sum_{i=1}^d x_i^2.
+$$
+
+Więcej informacji, w tym wizualizacje, na temat testowanych funkcji możecie
+znaleźć [tutaj](https://www.sfu.ca/~ssurjano/optimization.html).
+
+
 ### Zadanie 2.
 ### Zadanie 3.
 ### Zadanie 4.
