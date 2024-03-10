@@ -1,7 +1,7 @@
 ---
 title: Introduction to Artificial Intelligence [PL, WSI-24L-G103, WSI-24L-G104]
 subtitle: Wprowadzenie do Sztucznej Inteligencji
-date: "2024-03-12T12:00:00Z"
+date: "2024-02-26T12:00:00Z"
 lastmod: "2024-03-12T12:00:00Z"
 
 draft: false
@@ -153,8 +153,8 @@ znaleźć [tutaj](https://www.sfu.ca/~ssurjano/optimization.html).
 
 
 ### Zadanie 2.
-Treść zadania można pobrać tutaj: [zadanie-2-algorytmy-ewolucyjne.pdf](/media/wsi2024L/zadanie-2-algorytmy-ewolucyjne.pdf). W
-razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
+<!-- Treść zadania można pobrać tutaj: [zadanie-2-algorytmy-ewolucyjne.pdf](/media/wsi2024L/zadanie-2-algorytmy-ewolucyjne.pdf). W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.  -->
 
 ### Zadanie 3.
 ### Zadanie 4.
