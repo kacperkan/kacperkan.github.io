@@ -1,8 +1,8 @@
 ---
 title: Introduction to Artificial Intelligence [PL, WSI-24L-G103, WSI-24L-G104]
 subtitle: Wprowadzenie do Sztucznej Inteligencji
-date: "2024-02-23T00:00:00Z"
-lastmod: "2024-03-12:12:00:00Z"
+date: "2024-03-12T12:00:00Z"
+lastmod: "2024-03-12T12:00:00Z"
 
 draft: false
 featured: false
