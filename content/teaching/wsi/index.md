@@ -153,8 +153,8 @@ znaleźć [tutaj](https://www.sfu.ca/~ssurjano/optimization.html).
 
 
 ### Zadanie 2.
-Treść zadania można pobrać tutaj: [zadanie-2-algorytmy-ewolucyjne.pdf](/media/wsi2024L/zadanie-2-algorytmy-ewolucyjne.pdf). W
-razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
+<!-- Treść zadania można pobrać tutaj: [zadanie-2-algorytmy-ewolucyjne.pdf](/media/wsi2024L/zadanie-2-algorytmy-ewolucyjne.pdf). W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.  -->
 
 ### Zadanie 3.
 ### Zadanie 4.
