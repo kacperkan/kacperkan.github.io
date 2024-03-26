@@ -157,6 +157,8 @@ Treść zadania można pobrać tutaj: [zadanie-2-algorytmy-ewolucyjne.pdf](/medi
 razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
 
 ### Zadanie 3.
+Treść zadania można pobrać tutaj: [zadanie-3-minmax.pdf](/media/wsi2024L/zadanie-3-minmax.pdf). W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
 ### Zadanie 4.
 ### Zadanie 5.
 ### Zadanie 6.
