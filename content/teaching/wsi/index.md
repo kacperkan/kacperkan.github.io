@@ -160,6 +160,8 @@ razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.
 Treść zadania można pobrać tutaj: [zadanie-3-minmax.pdf](/media/wsi2024L/zadanie-3-minmax.pdf). W
 razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
 ### Zadanie 4.
+Treść zadania można pobrać tutaj: [zadanie-4-svm-drzewo.pdf](/media/wsi2024L/zadanie-4-svm-drzewo.pdf). W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
 ### Zadanie 5.
 ### Zadanie 6.
 ### Zadanie 7.
