@@ -163,5 +163,7 @@ razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.
 Treść zadania można pobrać tutaj: [zadanie-4-svm-drzewo.pdf](/media/wsi2024L/zadanie-4-svm-drzewo.pdf). W
 razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
 ### Zadanie 5.
+Treść zadania można pobrać tutaj: [zadanie-5-mlp.pdf](/media/wsi2024L/zadanie-5-mlp.pdf). W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. Proszę pamiętać, że zadanie jest wykonywane w grupach dwuosobowych!
 ### Zadanie 6.
 ### Zadanie 7.
