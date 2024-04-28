@@ -122,8 +122,8 @@ następujących celach:
 |2| Algorytmy ewolucyjne i genetyczne | 13.03.2024 | 27.03.2024 | 0-7 |
 |3| Dwuosobowe gry deterministyczne | 27.03.2024 | 10.04.2024 | 0-7 |
 |4| Regresja i klasyfikacja | 10.04.2024 | 24.04.2024 | 0-7 |
-|5| Sztuczne sieci neuronowe | 24.04.2024 | 15.05.2024 | 0-8 |
-|6| Uczenie ze wzmocnieniem | 15.05.2024 | 29.05.2024 | 0-7 |
+|5| Sztuczne sieci neuronowe | 24.04.2024 | 22.05.2024 | 0-8 |
+|6| Uczenie ze wzmocnieniem | 15.05.2024 | 05.06.2024 | 0-7 |
 |7| Modele bayesowskie | 29.05.2024 | 12.06.2024 | 0-7 |
 
 ## Zadania
