@@ -166,4 +166,8 @@ razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.
 Treść zadania można pobrać tutaj: [zadanie-5-mlp.pdf](/media/wsi2024L/zadanie-5-mlp.pdf). W
 razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. Proszę pamiętać, że zadanie jest wykonywane w grupach dwuosobowych!
 ### Zadanie 6.
+Treść zadania można pobrać tutaj: [zadanie-6-q-learning.pdf](/media/wsi2024L/zadanie-6-q-learning.pdf). W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
 ### Zadanie 7.
+Treść zadania można pobrać tutaj: [zadanie-7-nb.pdf](/media/wsi2024L/zadanie-7-nb.pdf). 
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. 
