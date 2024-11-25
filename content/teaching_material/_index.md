@@ -1,5 +1,5 @@
 ---
-title: Honours
+title: Teaching
 cms_exclude: false
 # View.
 view: citation

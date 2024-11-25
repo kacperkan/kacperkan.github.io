@@ -34,7 +34,7 @@ manipulation tasks, such as point cloud registration and regeneration, by a
 generative network."
 
 tags:
-featured: true
+featured: false
 
 links:
 # - name: Custom Link

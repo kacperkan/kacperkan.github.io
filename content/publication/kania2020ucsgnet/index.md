@@ -26,7 +26,7 @@ abstract: Signed distance field (SDF) is a prominent implicit representation of 
 summary: We present a new method that learns Constructive Solid Geometry (CSG) operations that operates on Signed Distance Field representation of 2D/3D shapes. The method discovers these operations without any supervision.
 
 tags:
-featured: true
+featured: false
 
 links:
 - name: Project Page
@@ -62,14 +62,3 @@ projects:
 #   Otherwise, set `slides: ""`.
 slides: ""
 ---
-
-<!-- {{% alert note %}}
-Click the *Cite* button above to demo the feature to enable visitors to import publication metadata into their reference management software.
-{{% /alert %}}
-
-{{% alert note %}}
-Click the *Slides* button above to demo Academic's Markdown slides feature.
-{{% /alert %}}
-
-Supplementary notes can be added here, including [code and math](https://sourcethemes.com/academic/docs/writing-markdown-latex/). -->
-

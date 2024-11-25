@@ -31,7 +31,7 @@ proposed approach provides structurally coherent reconstructions while producing
 meshes of quality comparable to the competitors."
 
 tags:
-featured: true
+featured: false
 
 links:
 url_pdf: 'https://arxiv.org/abs/2102.05984'
@@ -65,14 +65,3 @@ projects:
 #   Otherwise, set `slides: ""`.
 slides: ""
 ---
-
-<!-- {{% alert note %}}
-Click the *Cite* button above to demo the feature to enable visitors to import publication metadata into their reference management software.
-{{% /alert %}}
-
-{{% alert note %}}
-Click the *Slides* button above to demo Academic's Markdown slides feature.
-{{% /alert %}}
-
-Supplementary notes can be added here, including [code and math](https://sourcethemes.com/academic/docs/writing-markdown-latex/). -->
-

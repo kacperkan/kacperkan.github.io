@@ -25,7 +25,7 @@ abstract: Despite existing solutions for accurate translation between written an
 summary: We present a new classification deep learning model for American Sign Language fingerspelling recongition. Our approach relies on multiple, image-phenomena based augmentation methods and modern learning methodology that allowed the model to achieve new state-of-the-art results.
 
 tags:
-featured: true
+featured: false
 
 links:
 # - name: Custom Link

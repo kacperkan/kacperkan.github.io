@@ -2,23 +2,45 @@
 # Display name
 title: Kacper Kania
 
-# Username (this should match the folder name)
-authors:
-- admin
+# Name pronunciation (optional)
+name_pronunciation: 
+
+# Full name (for SEO)
+first_name: Kacper 
+last_name: Kania
+
+# Status emoji
+status:
+  icon: 👀️
 
 # Is this the primary user of the site?
 superuser: true
 
-# Role/position
+# Highlight the author in author lists? (true/false)
+highlight_name: true
+
+# Role/position/tagline
 role: PhD Student
 
-# Organizations/Affiliations
+# Organizations/Affiliations to display in Biography blox
 organizations:
-- name: Warsaw University of Technology
-  url: ""
+  - name: Warsaw University of Technology
+    url: https://eng.pw.edu.pl/
 
-# Short bio (displayed in user profile at end of posts)
-bio: My research interests include using machine learning algorithms in common computer vision and computer graphics problems
+# Social network links
+# Need to use another icon? Simply download the SVG icon to your `assets/media/icons/` folder.
+profiles:
+  - icon: at-symbol
+    url: 'mailto:kacper.kania.dokt@pw.edu.pl'
+    label: E-mail Me
+  - icon: brands/bluesky
+    url: https://kacperkan1.bsky.social
+  - icon: brands/x
+    url: https://twitter.com/kacperkan1
+  - icon: brands/github
+    url: https://github.com/kacperkan
+  - icon: academicons/google-scholar
+    url: https://scholar.google.com/citations?user=1wHZ-XcAAAAJ
 
 interests:
 - Computer Graphics
@@ -26,56 +48,91 @@ interests:
 - Machine Learning
 
 education:
-  courses:
-  - course: PhD (ongoing) "Low Shot Realistic Human Rendering from Partial Information"
-    institution: Warsaw University of Technology 
-    year: 
-  - course: PhD (moved to Warsaw University of Technology) "3D Shape Reconstruction of Objects in the Scene"
+  - area: PhD in Artificial Intelligence
+    institution: Warsaw University of Technology
+    date_start: 2020-10-01
+    date_end: 
+    summary: |
+      Working on "Few-Shot Neural Human Rendering from Sparse Information",
+      supervised by [Tomasz
+      Trzcinski](https://cvlab.ii.pw.edu.pl/ttrzcins/index-pl.html), [Marek
+      Kowalski](https://scholar.google.pl/citations?user=n137ACEAAAAJ&hl=en) in
+      collaboration with [Andrea Tagliasacchi](https://theialab.ca/) and [Kwang
+      Moo Yi](https://www.cs.ubc.ca/~kmyi/).
+    button:
+  - area: PhD in Artificial Intelligence (Discontinued)
     institution: Wrocław University of Science and Technology
-    year: 2020
-  - course: MSc in Computer Science with Data Science specialization
+    date_start: 2019-10-01
+    date_end: 2020-06-01
+    summary: |
+      Working on 3D reconstruction from single-view or point clouds. During
+      that time, I published our paper: ["UCSG-Net - Unsupervised Discovering
+      of Constructive Solid Geometry Tree"](https://arxiv.org/abs/2006.09102)
+      at NeurIPS 2020.
+    button: 
+      text: "Read the paper here"
+      url: "https://arxiv.org/abs/2006.09102"
+  - area: MSc in Data Science
     institution: Wrocław University of Science and Technology
-    year: 2019
-  - course: BSc in Computer Science
+    date_start: 2016-01-01
+    date_end: 2020-07-01
+    summary: |
+      Thesis on alternative synaptic signal aggregation (other than typical
+      product-sum). 
+  - area: BSc Artificial Intelligence
     institution: Wrocław University of Science and Technology
-    year: 2018
+    date_start: 2014-10-01
+    date_end: 2018-02-01
+    summary: |
+      Thesis on American Sign Language (ASL) recognition from a webcam.
+      Developed an algorithm that was published later at ICAISC 2018.
+    button:
+      text: "Read the paper here"
+      url: "https://link.springer.com/chapter/10.1007/978-3-319-91253-0_10"
 
-# Social/Academic Networking
-# For available icons, see: https://sourcethemes.com/academic/docs/page-builder/#icons
-#   For an email link, use "fas" icon pack, "envelope" icon, and a link in the
-#   form "mailto:your-email@example.com" or "#contact" for contact widget.
-social:
-- icon: envelope
-  icon_pack: fas
-  link: '#contact'  # For a direct email link, use "mailto:test@example.org".
-- icon: google-scholar
-  icon_pack: ai
-  link: https://scholar.google.com/citations?user=1wHZ-XcAAAAJ
-- icon: twitter
-  icon_pack: fab
-  link: https://twitter.com/kacperkan1
-- icon: github
-  icon_pack: fab
-  link: https://github.com/kacperkan
-# Link to a PDF of your resume/CV from the About widget.
-# To enable, copy your resume/CV to `static/files/cv.pdf` and uncomment the lines below.
-# - icon: cv
-#   icon_pack: ai
-#   link: files/cv.pdf
+work:
+  - position: Research Scientist Intern
+    company_name: Reality Labs at Meta
+    company_url: ''
+    company_logo: ''
+    date_start: 2024-07-22
+    date_end: 2024-10-25
+    summary: |2-
+      Developed an algorithm for Continuous Levels of Detail for the Gaussian
+      Splatting represention. We submitted our work to the CVPR 2025
+      conference, and it's currently under a review.
+  - position: Research Scientist Intern
+    company_name: Microsoft Research Cambridge
+    company_url: ''
+    company_logo: ''
+    date_start: 2022-07-01
+    date_end: 2022-09-22
+    summary: |
+      Designed an approach to modeling facial wrinkles from a few, multi-view
+      static frames of person. You can read more about our
+      [here](https://blendfields.github.io/).
 
-# Enter email to display Gravatar (if Gravatar enabled in Config)
-email: ""
+# Skills
+# Add your own SVG icons to `assets/media/icons/`
+skills:
 
-# Organizational groups that you belong to (for People widget)
-#   Set this to `[]` or comment out if you are not using People widget.
-user_groups:
-- Researchers
-- Visitors
+languages:
+  - name: Polish
+    percent: 100
+  - name: English
+    percent: 90
+
+# Awards.
+#   Add/remove as many awards below as you like.
+#   Only `title`, `awarder`, and `date` are required.
+#   Begin multi-line `summary` with YAML's `|` or `|2-` multi-line prefix and indent 2 spaces below.
+awards:
 ---
 
-I am a 3nd year PhD Student at Warsaw University of Technology. The PhD programme is 
-financed by Microsoft Research Cambridge. 
+## About Me
+I am a 4th year PhD Student at Warsaw University of Technology. The PhD
+programme is financed by Microsoft Research Cambridge. 
 
-My research revolves around 3D human animation and reconstruction in partial information
-and low-shot regime. My interests include computer graphics and application of machine learning methods
-in common 3D algorithms.
+My research revolves around 3D human animation and reconstruction in partial
+information and low-shot regime. My interests include computer graphics and
+application of machine learning methods in common 3D algorithms.
