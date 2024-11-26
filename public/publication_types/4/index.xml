@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>4 | Kacper Kania</title>
+    <link>https://kacper.ai/publication_types/4/</link>
+      <atom:link href="https://kacper.ai/publication_types/4/index.xml" rel="self" type="application/rss+xml" />
+    <description>4</description>
+    <generator>Hugo Blox Builder (https://hugoblox.com)</generator><language>en-us</language><lastBuildDate>Wed, 24 Nov 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://kacper.ai/media/icon_hu1015544924103876527.png</url>
+      <title>4</title>
+      <link>https://kacper.ai/publication_types/4/</link>
+    </image>
+    
+    <item>
+      <title>TrajeVAE: Controllable Human Motion Generation from Trajectories</title>
+      <link>https://kacper.ai/publication/kania2021trajevae/</link>
+      <pubDate>Wed, 24 Nov 2021 00:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/publication/kania2021trajevae/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Modeling 3D Surface Manifolds with a Locally Conditioned Atlas</title>
+      <link>https://kacper.ai/publication/spurek2021modeling/</link>
+      <pubDate>Thu, 11 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/publication/spurek2021modeling/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

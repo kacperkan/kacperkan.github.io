@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>1 | Kacper Kania</title>
+    <link>https://kacper.ai/publication_types/1/</link>
+      <atom:link href="https://kacper.ai/publication_types/1/index.xml" rel="self" type="application/rss+xml" />
+    <description>1</description>
+    <generator>Hugo Blox Builder (https://hugoblox.com)</generator><language>en-us</language><lastBuildDate>Thu, 08 Jun 2023 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://kacper.ai/media/icon_hu1015544924103876527.png</url>
+      <title>1</title>
+      <link>https://kacper.ai/publication_types/1/</link>
+    </image>
+    
+    <item>
+      <title>BlendFields: Few-Shot Example-Driven Facial Modeling</title>
+      <link>https://kacper.ai/publication/kania2023blendfields/</link>
+      <pubDate>Thu, 08 Jun 2023 00:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/publication/kania2023blendfields/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CoNeRF: Controllable Neural Radiance Fields</title>
+      <link>https://kacper.ai/publication/kania2021conerf/</link>
+      <pubDate>Mon, 06 Dec 2021 00:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/publication/kania2021conerf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>UCSG-Net - Unsupervised Discovering of Constructive Solid Geometry Tree</title>
+      <link>https://kacper.ai/publication/kania2020ucsgnet/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/publication/kania2020ucsgnet/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>American Sign Language Fingerspelling Recognition Using Wide Residual Networks</title>
+      <link>https://kacper.ai/publication/kania2018american/</link>
+      <pubDate>Fri, 11 May 2018 00:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/publication/kania2018american/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blog | Kacper Kania</title>
+    <link>https://kacper.ai/post/</link>
+      <atom:link href="https://kacper.ai/post/index.xml" rel="self" type="application/rss+xml" />
+    <description>Blog</description>
+    <generator>Hugo Blox Builder (https://hugoblox.com)</generator><language>en-us</language>
+    <image>
+      <url>https://kacper.ai/media/icon_hu1015544924103876527.png</url>
+      <title>Blog</title>
+      <link>https://kacper.ai/post/</link>
+    </image>
+    
+  </channel>
+</rss>

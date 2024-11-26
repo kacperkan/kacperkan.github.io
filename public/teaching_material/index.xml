@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Teaching | Kacper Kania</title>
+    <link>https://kacper.ai/teaching_material/</link>
+      <atom:link href="https://kacper.ai/teaching_material/index.xml" rel="self" type="application/rss+xml" />
+    <description>Teaching</description>
+    <generator>Hugo Blox Builder (https://hugoblox.com)</generator><language>en-us</language><lastBuildDate>Mon, 26 Feb 2024 12:00:00 +0000</lastBuildDate>
+    <image>
+      <url>https://kacper.ai/media/icon_hu1015544924103876527.png</url>
+      <title>Teaching</title>
+      <link>https://kacper.ai/teaching_material/</link>
+    </image>
+    
+    <item>
+      <title>Introduction to Artificial Intelligence [PL, WSI-24L-G103, WSI-24L-G104]</title>
+      <link>https://kacper.ai/teaching_material/wsi2024l/</link>
+      <pubDate>Mon, 26 Feb 2024 12:00:00 +0000</pubDate>
+      <guid>https://kacper.ai/teaching_material/wsi2024l/</guid>
+      <description>
+
+
+&lt;details class=&#34;print:hidden xl:hidden&#34; &gt;
+  &lt;summary&gt;Table of Contents&lt;/summary&gt;
+  &lt;div class=&#34;text-sm&#34;&gt;
+  &lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&#34;#zasady-laboratorium&#34;&gt;Zasady laboratorium&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#miejsce-i-czas-zajęć&#34;&gt;Miejsce i czas zajęć&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#wymagania&#34;&gt;Wymagania&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#ocena-i-oddawanie-zadań&#34;&gt;Ocena i oddawanie zadań&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zalecenia&#34;&gt;Zalecenia&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#opóźnienie-oddawania&#34;&gt;Opóźnienie oddawania&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#konsultacje&#34;&gt;Konsultacje&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#wykorzystanie-modeli-językowych&#34;&gt;Wykorzystanie modeli językowych&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#terminarz-dla-grupy-103&#34;&gt;Terminarz dla grupy 103&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#terminarz-dla-grupy-104&#34;&gt;Terminarz dla grupy 104&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&#34;#zadania&#34;&gt;Zadania&lt;/a&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-1&#34;&gt;Zadanie 1.&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-2&#34;&gt;Zadanie 2.&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-3&#34;&gt;Zadanie 3.&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-4&#34;&gt;Zadanie 4.&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-5&#34;&gt;Zadanie 5.&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-6&#34;&gt;Zadanie 6.&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#zadanie-7&#34;&gt;Zadanie 7.&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+  &lt;/div&gt;
+&lt;/details&gt;
+
+&lt;h2 id=&#34;zasady-laboratorium&#34;&gt;Zasady laboratorium&lt;/h2&gt;
+&lt;p&gt;Celem laboratorium jest zapoznanie się z podstawowymi algorytmami sztucznej
+inteligencji, ich zastosowaniem oraz analizą. Zaliczenie laboratorium odbywa się
+poprzez oddanie siedmiu ćwiczeń. Pełen kalendarz ćwiczeń znajduje się poniżej.
+Wszystkie ćwiczenia są realizowane indywidualne poza ćwiczeniem związanego z
+implementacją sieci neuronowych, gdzie zadanie będzie realizowane w parach. Na każde zadanie przypada 2 tygodnie. Nie ma
+obowiązku bycia na zajęciach po odebranie tematu ćwiczenia.&lt;/p&gt;
+&lt;h3 id=&#34;miejsce-i-czas-zajęć&#34;&gt;Miejsce i czas zajęć&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Grupa 103: Sala 011, budynek WEiTI, każdy wtorek, 12:15-14:00&lt;/li&gt;
+&lt;li&gt;Grupa 104: Sala 09, budynek WEiTI, każda środa, 16:15-18:00&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;wymagania&#34;&gt;Wymagania&lt;/h3&gt;
+&lt;p&gt;Zaliczenie pojedynczego zajęcia odbywa się poprzez oddanie:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;sprawozdania, na które składają się części opisane niżej,&lt;/li&gt;
+&lt;li&gt;kodu źródłowego.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Na sprawozdanie składa się:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;krótki opis działania algorytmu,&lt;/li&gt;
+&lt;li&gt;opis eksperymentów,&lt;/li&gt;
+&lt;li&gt;wyniki jakościowe i ilościowe,&lt;/li&gt;
+&lt;li&gt;wnioski, obserwacje.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Całe sprawozdanie powinno zamykać się maksymalnie w 5 stronach A4, w formacie jednokolumnowym.&lt;/p&gt;
+&lt;h3 id=&#34;ocena-i-oddawanie-zadań&#34;&gt;Ocena i oddawanie zadań&lt;/h3&gt;
+&lt;p&gt;Z każdego zadania można uzyskać 0-7 pkt., natomiast w przypadku tematu z
+sieciami neuronowymi: 0-8pkt.&lt;/p&gt;
+&lt;p&gt;Na liczbę przyznanych punktów składają się:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;poprawność implementacji algorytmu: 30%,&lt;/li&gt;
+&lt;li&gt;poprawność przeprowadzonych eksperymentów: 30%,&lt;/li&gt;
+&lt;li&gt;analiza i dyskusja wyników 35%,&lt;/li&gt;
+&lt;li&gt;poprawność sprawozdania: 5%.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Oddawanie zadania na zajęciach wygląda następująco:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;student pokazuje działanie algorytmu,&lt;/li&gt;
+&lt;li&gt;odpowiada na kilka pytań dotyczących wyników z raportu i działania algorytmu.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Oddane zadanie, czyli raport + kod źródłowy, należy spakować do pliku
+&lt;code&gt;wsi-{numer-indeksu}-{numer ćwiczenia}.zip&lt;/code&gt;  i przesłać na
+&lt;a href=&#34;mailto:kacper.kania.dokt@pw.edu.pl&#34;&gt;kacper.kania.dokt@pw.edu.pl&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Możliwe jest oddanie zadania przed terminem.&lt;/p&gt;
+&lt;h3 id=&#34;zalecenia&#34;&gt;Zalecenia&lt;/h3&gt;
+&lt;p&gt;Zachęcam do implementacji algorytmów przy wykorzystaniu Pythona. W ten sposób
+zwiększycie Państwo swoje szanse na skuteczność mojej pomocy przy ewentualnym
+debugowaniu. Inne języki programowania (Rust, C++, C#, Java) też są
+dopuszczalne.&lt;/p&gt;
+&lt;p&gt;Przy wykorzystaniu Pythona, zachęcam do automatycznego formatowania kodu za
+pomocą &lt;a href=&#34;https://github.com/psf/black&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;blacka&lt;/a&gt; i komendą:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;black --line-length &lt;span class=&#34;m&#34;&gt;79&lt;/span&gt; ./**/*.py
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;W przypadku korzystania z &lt;a href=&#34;https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;VSCode&amp;rsquo;a&lt;/a&gt; lub &lt;a href=&#34;https://black.readthedocs.io/en/stable/integrations/editors.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;PyCharma&lt;/a&gt; możliwe jest podpięcie
+automatycznego formatowania kodu.&lt;/p&gt;
+&lt;p&gt;Użytkowników Windowsa zachęcam do korzystania z &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/wsl/install&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Windows Subsystem for Linux
+(WSL)&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;opóźnienie-oddawania&#34;&gt;Opóźnienie oddawania&lt;/h3&gt;
+$$
+O_k = \max \{O_p(1- 10\% n), 0\},
+$$&lt;p&gt;gdzie $n$ to liczba dni opóźnienia (dzień po oddaniu $n{=}1$), $O_p$ to
+proponowana liczba punktów, a $O_k$ to końcowa liczba punktów. Dla przykładu,
+za tydzień opóźnienia zadania za 7 pkt. otrzymują Państwo 2,1 pkt.&lt;/p&gt;
+&lt;h3 id=&#34;konsultacje&#34;&gt;Konsultacje&lt;/h3&gt;
+&lt;p&gt;Jestem dostępny w piątki o 13 w sali 413 budynku WEiTI. Proszę powiadomić mnie
+wcześniej drogą mailową lub na Teamsie w przypadku chęci odbycia takich konsultacji.&lt;/p&gt;
+&lt;h3 id=&#34;wykorzystanie-modeli-językowych&#34;&gt;Wykorzystanie modeli językowych&lt;/h3&gt;
+&lt;p&gt;Dopuszczam wykorzystywanie modeli językowych, takich jak ChatGPT, w
+następujących celach:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;edycja tekstu &lt;strong&gt;już gotowego&lt;/strong&gt; sprawozdania (np. w celu usunięcia błędów
+językowych)&lt;/li&gt;
+&lt;li&gt;copilot (lub inne dowolne narzędzie tego typu) w celu predykcji kodu (jako
+następnego tokenu, nie jako całości algorytmu)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;terminarz-dla-grupy-103&#34;&gt;Terminarz dla grupy 103&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Lp.&lt;/th&gt;
+          &lt;th&gt;Temat&lt;/th&gt;
+          &lt;th&gt;Start&lt;/th&gt;
+          &lt;th&gt;Oddanie&lt;/th&gt;
+          &lt;th&gt;Punktacja&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;Przeszukiwanie przestrzeni&lt;/td&gt;
+          &lt;td&gt;27.02.2024&lt;/td&gt;
+          &lt;td&gt;12.03.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;Algorytmy ewolucyjne i genetyczne&lt;/td&gt;
+          &lt;td&gt;12.03.2024&lt;/td&gt;
+          &lt;td&gt;26.03.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;Dwuosobowe gry deterministyczne&lt;/td&gt;
+          &lt;td&gt;26.03.2024&lt;/td&gt;
+          &lt;td&gt;16.04.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;Regresja i klasyfikacja&lt;/td&gt;
+          &lt;td&gt;16.04.2024&lt;/td&gt;
+          &lt;td&gt;07.05.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;Sztuczne sieci neuronowe&lt;/td&gt;
+          &lt;td&gt;07.05.2024&lt;/td&gt;
+          &lt;td&gt;21.05.2024&lt;/td&gt;
+          &lt;td&gt;0-8&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;Uczenie ze wzmocnieniem&lt;/td&gt;
+          &lt;td&gt;21.05.2024&lt;/td&gt;
+          &lt;td&gt;04.06.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;Modele bayesowskie&lt;/td&gt;
+          &lt;td&gt;04.06.2024&lt;/td&gt;
+          &lt;td&gt;11.06.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;terminarz-dla-grupy-104&#34;&gt;Terminarz dla grupy 104&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Lp.&lt;/th&gt;
+          &lt;th&gt;Temat&lt;/th&gt;
+          &lt;th&gt;Start&lt;/th&gt;
+          &lt;th&gt;Oddanie&lt;/th&gt;
+          &lt;th&gt;Punktacja&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;Przeszukiwanie przestrzeni&lt;/td&gt;
+          &lt;td&gt;28.02.2024&lt;/td&gt;
+          &lt;td&gt;13.03.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;Algorytmy ewolucyjne i genetyczne&lt;/td&gt;
+          &lt;td&gt;13.03.2024&lt;/td&gt;
+          &lt;td&gt;27.03.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;Dwuosobowe gry deterministyczne&lt;/td&gt;
+          &lt;td&gt;27.03.2024&lt;/td&gt;
+          &lt;td&gt;10.04.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;Regresja i klasyfikacja&lt;/td&gt;
+          &lt;td&gt;10.04.2024&lt;/td&gt;
+          &lt;td&gt;08.05.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;Sztuczne sieci neuronowe&lt;/td&gt;
+          &lt;td&gt;24.04.2024&lt;/td&gt;
+          &lt;td&gt;22.05.2024&lt;/td&gt;
+          &lt;td&gt;0-8&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;Uczenie ze wzmocnieniem&lt;/td&gt;
+          &lt;td&gt;15.05.2024&lt;/td&gt;
+          &lt;td&gt;05.06.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;Modele bayesowskie&lt;/td&gt;
+          &lt;td&gt;29.05.2024&lt;/td&gt;
+          &lt;td&gt;12.06.2024&lt;/td&gt;
+          &lt;td&gt;0-7&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;zadania&#34;&gt;Zadania&lt;/h2&gt;
+&lt;h3 id=&#34;zadanie-1&#34;&gt;Zadanie 1.&lt;/h3&gt;
+&lt;p&gt;Zaimplementuj metodę gradientu prostego oraz przeprowadź analizę zaimplementowanej metody dla dwóch funkcji:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Funkcji Rastrigina dla zakresu $\mathbf{x} \in [-5,12; 5,12], \mathbf{x}\in\mathbb{R}^2$:
+$$
+f(\mathbf{x}) = 10d + \sum^d_{i=1}\left[x^2_i - 10\cos(2\pi x_i)\right],
+$$&lt;/li&gt;
+&lt;li&gt;Funkcji Griewanka dla zakresu $\mathbf{x} \in [-5, 5], \mathbf{x}\in\mathbb{R}^2$
+$$
+f(\mathbf{x}) = \sum^d_{i=1} \frac{x_i^2}{4000} -
+\prod^d_{i=1}\cos\left(\frac{x_i}{\sqrt{i}} \right) +1,
+$$
+gdzie $d$ to liczba wymiarów oraz $d{=}2$.&lt;/li&gt;
+&lt;/ul&gt;
+$$
+f(\mathbf{x}) = \sum_{i=1}^d x_i^2.
+$$&lt;p&gt;Więcej informacji, w tym wizualizacje, na temat testowanych funkcji możecie
+znaleźć &lt;a href=&#34;https://www.sfu.ca/~ssurjano/optimization.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;tutaj&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id=&#34;zadanie-2&#34;&gt;Zadanie 2.&lt;/h3&gt;
+&lt;p&gt;Treść zadania można pobrać tutaj: &lt;a href=&#34;https://kacper.ai/media/wsi2024L/zadanie-2-algorytmy-ewolucyjne.pdf&#34;&gt;zadanie-2-algorytmy-ewolucyjne.pdf&lt;/a&gt;. W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.&lt;/p&gt;
+&lt;h3 id=&#34;zadanie-3&#34;&gt;Zadanie 3.&lt;/h3&gt;
+&lt;p&gt;Treść zadania można pobrać tutaj: &lt;a href=&#34;https://kacper.ai/media/wsi2024L/zadanie-3-minmax.pdf&#34;&gt;zadanie-3-minmax.pdf&lt;/a&gt;. W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.&lt;/p&gt;
+&lt;h3 id=&#34;zadanie-4&#34;&gt;Zadanie 4.&lt;/h3&gt;
+&lt;p&gt;Treść zadania można pobrać tutaj: &lt;a href=&#34;https://kacper.ai/media/wsi2024L/zadanie-4-svm-drzewo.pdf&#34;&gt;zadanie-4-svm-drzewo.pdf&lt;/a&gt;. W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.&lt;/p&gt;
+&lt;h3 id=&#34;zadanie-5&#34;&gt;Zadanie 5.&lt;/h3&gt;
+&lt;p&gt;Treść zadania można pobrać tutaj: &lt;a href=&#34;https://kacper.ai/media/wsi2024L/zadanie-5-mlp.pdf&#34;&gt;zadanie-5-mlp.pdf&lt;/a&gt;. W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje. Proszę pamiętać, że zadanie jest wykonywane w grupach dwuosobowych!&lt;/p&gt;
+&lt;h3 id=&#34;zadanie-6&#34;&gt;Zadanie 6.&lt;/h3&gt;
+&lt;p&gt;Treść zadania można pobrać tutaj: &lt;a href=&#34;https://kacper.ai/media/wsi2024L/zadanie-6-q-learning.pdf&#34;&gt;zadanie-6-q-learning.pdf&lt;/a&gt;. W
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.&lt;/p&gt;
+&lt;h3 id=&#34;zadanie-7&#34;&gt;Zadanie 7.&lt;/h3&gt;
+&lt;p&gt;Treść zadania można pobrać tutaj: &lt;a href=&#34;https://kacper.ai/media/wsi2024L/zadanie-7-nb.pdf&#34;&gt;zadanie-7-nb.pdf&lt;/a&gt;.
+razie pytań, zapraszam do kontaktu na MS Teams oraz na konsultacje.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
