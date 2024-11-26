@@ -6,7 +6,7 @@
 # Website name
 title: Kacper Kania
 # Website URL
-baseURL: 'https://kacper.ai'
+baseURL: 'https://kacper.ai/'
 
 ############################
 ## LANGUAGE
