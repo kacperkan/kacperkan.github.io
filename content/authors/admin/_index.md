@@ -35,6 +35,8 @@ profiles:
     label: E-mail Me
   - icon: brands/bluesky
     url: https://kacperkan1.bsky.social
+  - icon: brands/linkedin
+    url: https://www.linkedin.com/in/kacper-kania-65305a345/
   - icon: brands/x
     url: https://twitter.com/kacperkan1
   - icon: brands/github
@@ -70,7 +72,7 @@ education:
       of Constructive Solid Geometry Tree"](https://arxiv.org/abs/2006.09102)
       at NeurIPS 2020.
     button: 
-      text: "Read the paper here"
+      text: "Read about our work here"
       url: "https://arxiv.org/abs/2006.09102"
   - area: MSc in Data Science
     institution: Wrocław University of Science and Technology
@@ -87,7 +89,7 @@ education:
       Thesis on American Sign Language (ASL) recognition from a webcam.
       Developed an algorithm that was published later at ICAISC 2018.
     button:
-      text: "Read the paper here"
+      text: "Read about our work here"
       url: "https://link.springer.com/chapter/10.1007/978-3-319-91253-0_10"
 
 work:
@@ -97,7 +99,7 @@ work:
     company_logo: ''
     date_start: 2024-07-22
     date_end: 2024-10-25
-    summary: |2-
+    summary: |
       Developed an algorithm for Continuous Levels of Detail for the Gaussian
       Splatting represention. We submitted our work to the CVPR 2025
       conference, and it's currently under a review.
@@ -109,8 +111,21 @@ work:
     date_end: 2022-09-22
     summary: |
       Designed an approach to modeling facial wrinkles from a few, multi-view
-      static frames of person. You can read more about our
-      [here](https://blendfields.github.io/).
+      static frames of person. Our work was accepted to CVPR 2023. 
+    button: 
+      text: Read about our work here
+      url: https://blendfields.github.io/
+  - position: Visiting Internation Research Student
+    company_name: University of British Columbia
+    company_url: ''
+    company_logo: ''
+    date_start: 2021-06-01
+    date_end: 2021-12-01
+    summary: |
+      An exciting collaboration with [Kwang Moo Yi](https://www.cs.ubc.ca/~kmyi/) and [Andrea Tagliasacchi](https://theialab.ca/) which lasts to this day. We managed to extend learnable radiance fields with controllability capabilities for a post-hoc artistic editions.  Our work was accepted to CVPR 2022. 
+    button: 
+      text: Read about our work here
+      url: https://conerf.github.io/
 
 # Skills
 # Add your own SVG icons to `assets/media/icons/`

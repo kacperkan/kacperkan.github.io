@@ -15,9 +15,9 @@ marketing:
     local_business_type: ''
     org_name: ''
     description: 'Personal website of Kacper Kania, a PhD student at Warsaw University of Technology.'
-    twitter: 'GetResearchDev'
+    twitter: 'kacperkan1'
   analytics:
-    google_analytics: ''
+    google_analytics: 'G-PEB4E4GMBT'
     baidu_tongji: ''
     plausible: ''
     fathom: ''
@@ -55,6 +55,6 @@ locale:
 # Site features
 features:
   math:
-    enable: false
+    enable: true
   privacy_pack:
-    enable: false
+    enable: true
