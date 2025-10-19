@@ -11,7 +11,7 @@ last_name: Kania
 
 # Status emoji
 status:
-  icon: 👀️
+  icon: ️👨‍🔬
 
 # Is this the primary user of the site?
 superuser: true
@@ -20,18 +20,18 @@ superuser: true
 highlight_name: true
 
 # Role/position/tagline
-role: PhD Student
+role: Machine Learning Engineer 
 
 # Organizations/Affiliations to display in Biography blox
 organizations:
-  - name: Warsaw University of Technology
-    url: https://eng.pw.edu.pl/
+  - name: Cantina AI Labs
+    url: https://cantina.com/
 
 # Social network links
 # Need to use another icon? Simply download the SVG icon to your `assets/media/icons/` folder.
 profiles:
   - icon: at-symbol
-    url: 'mailto:kacper.kania.dokt@pw.edu.pl'
+    url: 'mailto:kacp.kania@gmail.com'
     label: E-mail Me
   - icon: brands/bluesky
     url: https://kacperkan1.bsky.social
@@ -53,7 +53,7 @@ education:
   - area: PhD in Artificial Intelligence
     institution: Warsaw University of Technology
     date_start: 2020-10-01
-    date_end: 
+    date_end: 2025-09-30
     summary: |
       Working on "Few-Shot Neural Human Rendering from Sparse Information",
       supervised by [Tomasz
@@ -93,6 +93,15 @@ education:
       url: "https://link.springer.com/chapter/10.1007/978-3-319-91253-0_10"
 
 work:
+  - position: Machine Learning Engineer
+    company_name: Cantina
+    company_url: 'https://cantina.com/'
+    company_logo: ''
+    date_start: 2025-03-31
+    date_end: 
+    summary: |
+      Working on the lipsyncing part of our product. I'm responsible for the
+      planning and experimenting with our approach.
   - position: Research Scientist Intern
     company_name: Reality Labs at Meta
     company_url: ''
@@ -145,9 +154,10 @@ awards:
 ---
 
 ## About Me
-I am a 4th year PhD Student at Warsaw University of Technology. The PhD
-programme is financed by Microsoft Research Cambridge. 
+I received PhD degree with distinctions on the 30th September 2025 
+at Warsaw University of Technology. 
+I'm currently working at Cantina Labs as Machine Learning Engineer/Researcher.
 
-My research revolves around 3D human animation and reconstruction in partial
-information and low-shot regime. My interests include computer graphics and
+My research revolves around 3D human animation and reconstruction using radiance
+fields and Gaussan splatting. My interests include computer graphics and
 application of machine learning methods in common 3D algorithms.

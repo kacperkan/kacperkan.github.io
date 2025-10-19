@@ -52,7 +52,7 @@ sections:
     design:
       view: citation
   - block: resume-experience
-    id: internships
+    id: work-experience
     content:
       username: admin
     design:

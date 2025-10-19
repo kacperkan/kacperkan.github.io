@@ -10,8 +10,8 @@ main:
   - name: Papers
     url: /#papers
     weight: 11
-  - name: Internships
-    url: /#internships
+  - name: Work Experience
+    url: /#work-experience
     weight: 12
   - name: Honours
     url: /#honours
