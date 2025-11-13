@@ -1,0 +1,116 @@
+{{ if not (.Page.Scratch.Get "exercise-css-loaded") }}
+<style>
+  .exercise-info {
+    margin-top: -1rem;
+    line-height: 1.6;
+    margin: 0 auto;
+  }
+
+  .exercise-info iframe {
+    margin-top: 1rem;
+    max-width: 100%;
+    width: auto;
+    aspect-ratio: 9 / 16;
+  }
+
+  @media (max-width: 768px) {
+    .exercise-info iframe {
+      width: 100%;
+      height: auto;
+    }
+  }
+</style>
+{{ .Page.Scratch.Set "exercise-css-loaded" true }} {{ end }} 
+
+{{/* layouts/shortcodes/exercise.html */}}
+{{ $cell_data := .Get "cell_data" }}
+{{ $comment := .Get "comment" | default "" }}
+{{ $link_data := .Get "link_data" | default "" }}
+{{ $is_time := .Get "is_time" | default "false" }}
+
+{{/* Parse cell_data - split by space */}}
+{{ $parts := split $cell_data " " }}
+{{ $weights_data := "" }}
+{{ $repetitions_data := "" }}
+
+{{ if ge (len $parts) 1 }}
+  {{ $weights_data = index $parts 0 }}
+{{ end }}
+{{ if ge (len $parts) 2 }}
+  {{ $repetitions_data = index $parts 1 }}
+{{ end }}
+
+{{/* Format weights */}}
+{{ $weight_list := split $weights_data "/" }}
+{{ $formatted_weights := slice }}
+{{ range $weight_list }}
+  {{ $weight_str := . }}
+  {{ if eq . "0" }}
+    {{ $weight_str = "bez" }}
+  {{ else if not (in . ".") }}
+    {{ $weight_str = printf "%s.0" . }}
+  {{ else }}
+    {{ $parts := split . "." }}
+    {{ if and (gt (len $parts) 1) (eq (index $parts 1) "") }}
+      {{ $weight_str = printf "%s0" . }}
+    {{ end }}
+  {{ end }}
+  {{ $formatted_weights = $formatted_weights | append $weight_str }}
+{{ end }}
+{{ $formatted_weights_str := delimit $formatted_weights ", " }}
+
+{{/* Format repetitions/times - remove parentheses if present */}}
+{{ $formatted_reps := "" }}
+{{ if ne $repetitions_data "" }}
+  {{ $rep_data := $repetitions_data }}
+  {{/* Remove surrounding parentheses */}}
+  {{ if and (strings.HasPrefix $rep_data "(") (strings.HasSuffix $rep_data ")") }}
+    {{ $rep_data = strings.Trim $rep_data "()" }}
+  {{ end }}
+  {{ $rep_list := split $rep_data "/" }}
+  {{ $formatted_reps = delimit $rep_list ", " }}
+{{ end }}
+
+{{/* Extract YouTube video ID if present */}}
+{{ $video_id := "" }}
+{{ if $link_data }}
+  {{ if or (in $link_data "youtube.com") (in $link_data "youtu.be") }}
+    {{ if in $link_data "youtu.be/" }}
+      {{ $video_id = index (split $link_data "youtu.be/") 1 }}
+      {{ $video_id = index (split $video_id "?") 0 }}
+    {{ else if in $link_data "youtube.com/watch" }}
+      {{ $query := index (split $link_data "?") 1 }}
+      {{ range split $query "&" }}
+        {{ if strings.HasPrefix . "v=" }}
+          {{ $video_id = strings.TrimPrefix . "v=" }}
+        {{ end }}
+      {{ end }}
+    {{ else if in $link_data "youtube.com/embed/" }}
+      {{ $video_id = index (split $link_data "youtube.com/embed/") 1 }}
+      {{ $video_id = index (split $video_id "?") 0 }}
+    {{ else if in $link_data "youtube.com/shorts/" }}
+      {{ $video_id = index (split $link_data "youtube.com/shorts/") 1 }}
+      {{ $video_id = index (split $video_id "?") 0 }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* Build output */}}
+<div class="exercise-info">
+  <strong>Ciężary:</strong> {{ $formatted_weights_str }}<br>
+  {{ if $formatted_reps }}
+    {{ if eq $is_time "true" }}
+      <strong>Czasy:</strong> {{ $formatted_reps }}<br>
+    {{ else }}
+      <strong>Powtórzenia:</strong> {{ $formatted_reps }}<br>
+    {{ end }}
+  {{ end }}
+  {{ with $comment }}
+    <strong>Komentarz:</strong> {{ . }}<br>
+  {{ end }}
+  {{ if $video_id }}
+    <iframe width="432" height="768" src="https://www.youtube.com/embed/{{ $video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  {{ else if $link_data }}
+    <a href="{{ $link_data }}" target="_blank">{{ $link_data }}</a><br>
+  {{ end }}
+</div>
