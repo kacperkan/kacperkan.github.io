@@ -1,5 +1,5 @@
 ---
-title: 16.11.2025 – 5
+title: 16.11.2025 – B
 date: 2025-11-19
 math: true
 tags:
