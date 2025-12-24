@@ -9,7 +9,7 @@ tags:
 1. Thusters 40 47,5 52,5 57,5 62,5 67,5x4
 {{<
     exercise cell_data="40/47.5/52.5/57.5/62.5/67.5 (4/4/4/4/4/4) <10/10/10/6/3/0> "
-    comment="Znowu skopałem pierwsze podejście, za drugim razem spoko wyszło (mimo że mnie trochę przechyliło pod koniec)"
+    comment="Znowu skopałem pierwsze podejście, za drugim razem spoko wyszło (mimo że mnie trochę przechyliło pod koniec). Powiedz mi, bo jeszcze nie jestem pewien—mam robić pełen przysiad czy raczej nie ma aż tak dużego znaczenia?"
     link_data="https://youtube.com/shorts/L88whcK2BVM?feature=share, https://youtube.com/shorts/L9odwnmNOZ4?feature=share"
 >}}
 
