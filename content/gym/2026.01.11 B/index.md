@@ -24,7 +24,7 @@ tags:
 3. Wyciskanie leżąc 50 57,5 65 72,5 77,5 82,5 87,5 92,5x2
 {{<
     exercise cell_data="50/57.5/65/72.5/77.5/82.5/87.5/92.5 (2/2/2/2/2/2/2) <10/10/10/8/5/2/0> "
-    comment="W 2. powtórzeniu trochę w panice od razu zacząłem podnosić."
+    comment="W 2. powtórzeniu trochę w panice od razu zacząłem podnosić. Szerokość chwytu mogłem skopać, ta sztanga miała jakoś zupełnie inny rozstaw tych pierścieni na gryfie."
     link_data="https://youtube.com/shorts/6wVdODT4tvE?feature=share"
 >}}
 
