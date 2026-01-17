@@ -30,7 +30,7 @@ tags:
 4. Wyciskanie leżąc wąskim chwytem 40 47,5 55 62,5 70 77,5 85x3
 {{<
     exercise cell_data="40/47.5/55/62.5/70/77.5/85 (3/3/3/3/3/3/3) <10/10/10/10/8/5/2>"
-    comment="Zapas jeszcze był."
+    comment="Zapas jeszcze był. Węższy chwyt teraz zrobiłem trochę."
     link_data="https://youtube.com/shorts/Xgd1lThOOlM?feature=share"
 >}}
 
