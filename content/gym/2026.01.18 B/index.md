@@ -1,49 +1,57 @@
 ---
-title: 25.01.2026 – A
-date: 2026-01-26
+title: 18.01.2026 – B
+date: 2026-01-21
 math: true
 tags:
     - Gym
 ---
 
-1. Przysiady ze stangą z przodu 50 60 70 80 90x5
+1. Zakroki z hantlami 5x5
 {{<
-    exercise cell_data="50/60/70/80/90 (5/5/5/5/5) <10/10/8/5/4> "
-    comment="Fajnie poszło, sporo zapasu jeszcze. Mam wrażenie, że biodrami robię jakąś dziwną trajektorię (może przez ten, że podnosząc się do góry trochę się pochylam do przodu?)."
-    link_data="https://youtube.com/shorts/woexxVVkDWI?feature=share"
+    exercise cell_data="22.5/27.5/32.5/37.5/42.5 (5/5/5/5/5) <10/10/7/4/1> [5x5]"
+    comment="Trochę zaskoczył mnie ten ciężar na końcu, teraz dopiero widzę, że nie dosięgałem kolanem do ziemi."
+    link_data="https://youtube.com/shorts/6PVulU9xnhw?feature=share"
 >}}
 
-2. Wyciskanie żołnierskie 30 35 40 45 50x5
+2. Martwy ciąg klasyczny 70 85 100 112,5 125 135 145 155x2
 {{<
-    exercise cell_data="30/35/40/45/50 (5/5/5/5/5) <10/10/10/6/3> [pamiętać o spięciu pleców]"
-    comment="W sumie dobry ciężar na początek."
-    link_data="https://youtube.com/shorts/n0AeCRdEnoA?feature=share"
+    exercise cell_data="70/85/100/112.5/125/135/145/155 (2/2/2/2/2/2/2/2) <10/10/10/10/8/6/2/0> [spięcie przed rozpoczęciem, klatkę do przodu]"
+    comment="Musiałem się 'zresetować' bo straciłem napięcie w górnej części ciała i wydawało mi się pewnie, żeby jeszcze raz się przyłożyć. Miałem próbę z 160kg, ale przy podnoszeniu zacząłem się martwić o uraz i zrezygnowałem."
+    link_data="https://youtube.com/shorts/gk1E8A8NuR4?feature=share,https://youtube.com/shorts/dvso6_f4UoA?feature=share"
 >}}
 
-3. Podciąganie na drążku podchwytem 5x5
+3. Wyciskanie leżąc 50 57,5 65 72,5 80 85 90 95x2
 {{<
-    exercise cell_data="0/7.5/12.5/7.5/0 (5/5/5/5/5) <10/5/3/4/6> [5x5, 0/7.5/12.5/7.5/0]"
+    exercise cell_data="50/57.5/65/72.5/80/85/90/95/97.5 (2/2/2/2/2/2/2/2/1) <10/10/10/10/9/7/4/2/1> [dłużej na dole, nie ściągać tak w kierunku brzucha!]"
+    comment="Spróbowałem jeszcze 97.5kg na końcu i spoko całkiem poszło."
+    link_data="https://youtube.com/shorts/yXjoA7vm4HU?feature=share,https://youtube.com/shorts/eQ5SRTdsFSM?feature=share"
+>}}
+
+4. Seal row 5x5
+{{<
+    exercise cell_data="42.5/50/57.5/65/72.5 (5/5/5/5/5) <10/10/7/3/1> [5x5]"
     comment=""
-    link_data="https://youtube.com/shorts/_GXq2-nFQ0k?feature=share"
+    link_data="https://youtube.com/shorts/WaHfe6hWJwA?feature=share"
 >}}
 
-4. Pompki na poręczach z obciążeniem 5x5
+5. Super seria:
+- Arnoldki 4x8
 {{<
-    exercise cell_data="0/10/20/10/0 (5/5/5/5/5) <10/7/4/5/8> [5x5, 0/10/20/10/0]"
-    comment="Startowałem z ławeczki, bo na zmianę robiłem z innym gościem,  który miałe jeszcze pełno serii przed sobą."
-    link_data="https://youtube.com/shorts/BksbV8gQ8C4?feature=share"
+    exercise cell_data="10/15/20/25 (8/8/8/6) <10/10/6/0> [4x8]"
+    comment="Poszło tak samo jak ostatnio."
+    link_data="https://youtube.com/shorts/VFv-S3NmneI?feature=share"
 >}}
 
-5. Inverted row TRX 3x max
+- Ściąganie drążka podchwytem 4x8
 {{<
-    exercise cell_data="0/0/0 (15/14/10) <0/0/0> [3x max, ostatnim razem było 19/12]"
-    comment="Nie jest pewien co do ustawienia (czy nie za wysoko). Chyba początkowa pozycja powinna być bliżej ziemi?"
-    link_data="https://youtube.com/shorts/IILZ8Ie_8Rg?feature=share"
->}}
-
-6. Uginanie nóg na piłce 3x max
-{{<
-    exercise cell_data="0/0/0 (20/15/13) <0/0/0> [3x max, ostatnim razem było 12/10/13]"
+    exercise cell_data="60/70/80/90 (8/8/8/7) <10/8/4/1> [4x8]"
     comment=""
-    link_data="https://youtube.com/shorts/u6NlnzI0w2Y?feature=share"
+    link_data="https://youtube.com/shorts/FQnyQVbMXJk?feature=share"
+>}}
+
+6. Pullover hantlem 5x6
+{{<
+    exercise cell_data="22.5/27.5/32.5/37.5/42.5 (6/6/6/6/5) <10/10/8/3/0> [5x6]"
+    comment=""
+    link_data="https://youtube.com/shorts/pHoaUxyGiTM?feature=share"
 >}}
