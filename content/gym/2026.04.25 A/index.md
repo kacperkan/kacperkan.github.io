@@ -1,6 +1,6 @@
 ---
-title: 27.04.2026 – A
-date: 2026-04-25
+title: 25.04.2026 – A
+date: 2026-04-27
 math: true
 tags:
     - Gym
