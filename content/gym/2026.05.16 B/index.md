@@ -16,7 +16,7 @@ tags:
 2. Martwy ciąg sumo 70 80 90 100 110 120 130 140x2
 {{<
     exercise cell_data="70/80/90/100/110/120/130/140 (2/2/2/2/2/2/2/2) <10/10/10/10/8/7/4/1> "
-    comment="Eksperymentowałem trochę z ustawieniem i mam wrażenie, że łatwiej mi było podnieść przy takiej pozycji (pośladki też mi nie wystrzeliły do góry przynajmniej i chyba bardziej angażowałem czwórki mimo wszystko). Mam wrażenie, że kosztem tego, że ta pozycja jest trochę bardziej równoległa, to chciałbym spróbować szersze ustawienie. Co myślisz?"
+    comment="Eksperymentowałem trochę z ustawieniem i mam wrażenie, że łatwiej mi było podnieść przy takiej pozycji (pośladki też mi nie wystrzeliły do góry przynajmniej i chyba bardziej angażowałem czwórki mimo wszystko). Mam wrażenie, że kosztem tego, że ta pozycja jest trochę bardziej równoległa do podłogi (w sensie plecy), to chciałbym spróbować szersze ustawienie. Co myślisz?"
     link_data="https://youtube.com/shorts/UYpisuRElDI?feature=share"
 >}}
 
