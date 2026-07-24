@@ -16,7 +16,7 @@ tags:
 2. Wyciskanie z kaptura 20 25 30 35 40 45 50 55x2
 {{<
     exercise cell_data="20/25/30/35/40/45/50/55 (2/2/2/2/2/2/2/2) <10/10/10/10/8/6/4/2/0>"
-    comment="Teraz się udało, przy szybszym podnoszeniu, chociaż i tak szorowałem po głowie."
+    comment="Teraz się udało, przy szybszym podnoszeniu, chociaż i tak szorowałem po głowie. (coś jest problem z linkiem, także tutaj w razie czego: https://youtube.com/shorts/5xwhZIcpd44)"
     link_data="https://youtube.com/shorts/5xwhZIcpd44"
 >}}
 
