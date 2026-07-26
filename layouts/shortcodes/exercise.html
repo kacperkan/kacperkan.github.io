@@ -1,112 +1,168 @@
-{{ if not (.Page.Scratch.Get "exercise-css-loaded") }}
+{{/* layouts/shortcodes/exercise.html
 
-<style>
-  /* Rest of your existing CSS... */
-  .exercise-info {
-    margin-top: -1rem;
-    line-height: 1.6;
-    margin: 0 auto;
-  }
+  Renders one exercise: a set-by-set table plus its videos.
 
-  .exercise-videos {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-  }
+  cell_data format:  weights (reps) <reserve> [scheme]
+    "40/47.5/52.5 (10/10/9) <10/9/3> [3x10]"
+  weights, reps and reserve are slash-separated and positional — set N is the
+  Nth entry of each. `is_time="true"` labels the middle column as seconds.
 
-  .exercise-videos iframe {
-    flex: 1;
-    min-width: 300px;
-    max-width: 432px;
-    width: auto;
-    aspect-ratio: 9 / 16;
-  }
+  Videos are rendered as facades (thumbnail + play button); the YouTube iframe
+  is only created on click, so a page with 9 clips no longer loads 9 players.
+*/}}
 
-  .exercise-info iframe {
-    margin-top: 1rem;
-    max-width: 100%;
-    width: auto;
-    aspect-ratio: 9 / 16;
-  }
+{{ $cell_data := .Get "cell_data" }}
+{{ $comment := .Get "comment" | default "" }}
+{{ $link_data := .Get "link_data" | default "" }}
+{{ $is_time := eq (.Get "is_time" | default "false") "true" }}
 
-  @media (max-width: 768px) {
-    .exercise-videos {
-      flex-direction: column;
-    }
+{{/* Split "weights (reps) <reserve> [scheme]" into its parts. */}}
+{{ $weights := slice }}
+{{ $reps := slice }}
+{{ $reserve := slice }}
+{{ $scheme := "" }}
 
-    .exercise-videos iframe {
-      width: 100%;
-      max-width: 100%;
-      height: auto;
-    }
+{{ $weights_raw := index (findRE `^[^\s()<>\[\]]+` $cell_data 1) 0 | default "" }}
+{{ with $weights_raw }}
+  {{ range split . "/" }}
+    {{ if ne . "" }}{{ $weights = $weights | append . }}{{ end }}
+  {{ end }}
+{{ end }}
 
-    .exercise-info iframe {
-      width: 100%;
-      height: auto;
-    }
-  }
-</style>
-{{ .Page.Scratch.Set "exercise-css-loaded" true }} {{ end }} {{/*
-layouts/shortcodes/exercise.html */}} {{ $cell_data := .Get "cell_data" }} {{
-$comment := .Get "comment" | default "" }} {{ $link_data := .Get "link_data" |
-default "" }} {{ $is_time := .Get "is_time" | default "false" }} {{/* Parse
-cell_data - split by space */}} {{ $parts := split $cell_data " " }} {{
-$weights_data := "" }} {{ $repetitions_data := "" }} {{ if ge (len $parts) 1 }}
-{{ $weights_data = index $parts 0 }} {{ end }} {{ if ge (len $parts) 2 }} {{
-$repetitions_data = index $parts 1 }} {{ end }} {{/* Format weights */}} {{
-$weight_list := split $weights_data "/" }} {{ $formatted_weights := slice }} {{
-range $weight_list }} {{ $weight_str := . }} {{ if eq . "0" }} {{ $weight_str =
-"bez" }} {{ else if not (in . ".") }} {{ $weight_str = printf "%s.0" . }} {{
-else }} {{ $parts := split . "." }} {{ if and (gt (len $parts) 1) (eq (index
-$parts 1) "") }} {{ $weight_str = printf "%s0" . }} {{ end }} {{ end }} {{
-$formatted_weights = $formatted_weights | append $weight_str }} {{ end }} {{
-$formatted_weights_str := delimit $formatted_weights ", " }} {{/* Format
-repetitions/times - remove parentheses if present */}} {{ $formatted_reps := ""
-}} {{ if ne $repetitions_data "" }} {{ $rep_data := $repetitions_data }} {{/*
-Remove surrounding parentheses */}} {{ if and (strings.HasPrefix $rep_data "(")
-(strings.HasSuffix $rep_data ")") }} {{ $rep_data = strings.Trim $rep_data "()"
-}} {{ end }} {{ $rep_list := split $rep_data "/" }} {{ $formatted_reps = delimit
-$rep_list ", " }} {{ end }} {{/* Parse link_data as list (comma or
-pipe-separated) */}} {{ $links := slice }} {{ if $link_data }} {{ $delimiter :=
-"," }} {{ if in $link_data "|" }} {{ $delimiter = "|" }} {{ end }} {{ $links =
-split $link_data $delimiter }} {{ end }} {{/* Function to extract YouTube video
-ID */}} {{ $video_ids := slice }} {{ $other_links := slice }} {{ range $links }}
-{{ $link := strings.TrimSpace . }} {{ $video_id := "" }} {{ if or (in $link
-"youtube.com") (in $link "youtu.be") }} {{ if in $link "youtu.be/" }} {{
-$video_id = index (split $link "youtu.be/") 1 }} {{ $video_id = index (split
-$video_id "?") 0 }} {{ else if in $link "youtube.com/watch" }} {{ $query :=
-index (split $link "?") 1 }} {{ range split $query "&" }} {{ if
-strings.HasPrefix . "v=" }} {{ $video_id = strings.TrimPrefix . "v=" }} {{ end
-}} {{ end }} {{ else if in $link "youtube.com/embed/" }} {{ $video_id = index
-(split $link "youtube.com/embed/") 1 }} {{ $video_id = index (split $video_id
-"?") 0 }} {{ else if in $link "youtube.com/shorts/" }} {{ $video_id = index
-(split $link "youtube.com/shorts/") 1 }} {{ $video_id = index (split $video_id
-"?") 0 }} {{ end }} {{ if $video_id }} {{ $video_ids = $video_ids | append
-$video_id }} {{ end }} {{ else if ne $link "" }} {{ $other_links = $other_links
-| append $link }} {{ end }} {{ end }} {{/* Build output */}}
-<div class="exercise-info">
-  <strong>Ciężary:</strong> {{ $formatted_weights_str }}<br />
-  {{ if $formatted_reps }} {{ if eq $is_time "true" }}
-  <strong>Czasy:</strong> {{ $formatted_reps }}<br />
-  {{ else }}
-  <strong>Powtórzenia:</strong> {{ $formatted_reps }}<br />
-  {{ end }} {{ end }} {{ with $comment }}
-  <strong>Komentarz:</strong> {{ . }}<br />
-  {{ end }} {{ if gt (len $video_ids) 0 }}
+{{ with index (findRESubmatch `\(([^)]*)\)` $cell_data 1) 0 }}
+  {{ range split (index . 1) "/" }}
+    {{ if ne . "" }}{{ $reps = $reps | append . }}{{ end }}
+  {{ end }}
+{{ end }}
+
+{{ with index (findRESubmatch `<([^>]*)>` $cell_data 1) 0 }}
+  {{ range split (index . 1) "/" }}
+    {{ if ne . "" }}{{ $reserve = $reserve | append . }}{{ end }}
+  {{ end }}
+{{ end }}
+
+{{ with index (findRESubmatch `\[([^\]]*)\]` $cell_data 1) 0 }}
+  {{ $scheme = index . 1 }}
+{{ end }}
+
+{{/* Parse link_data (comma or pipe separated) into YouTube ids and other links. */}}
+{{ $video_ids := slice }}
+{{ $other_links := slice }}
+{{ if $link_data }}
+  {{ $delimiter := cond (in $link_data "|") "|" "," }}
+  {{ range split $link_data $delimiter }}
+    {{ $link := strings.TrimSpace . }}
+    {{ $video_id := "" }}
+    {{ if or (in $link "youtube.com") (in $link "youtu.be") }}
+      {{ if in $link "youtu.be/" }}
+        {{ $video_id = index (split (index (split $link "youtu.be/") 1) "?") 0 }}
+      {{ else if in $link "youtube.com/watch" }}
+        {{ range split (index (split $link "?") 1) "&" }}
+          {{ if strings.HasPrefix . "v=" }}{{ $video_id = strings.TrimPrefix "v=" . }}{{ end }}
+        {{ end }}
+      {{ else if in $link "youtube.com/embed/" }}
+        {{ $video_id = index (split (index (split $link "youtube.com/embed/") 1) "?") 0 }}
+      {{ else if in $link "youtube.com/shorts/" }}
+        {{ $video_id = index (split (index (split $link "youtube.com/shorts/") 1) "?") 0 }}
+      {{ end }}
+      {{ with $video_id }}{{ $video_ids = $video_ids | append . }}{{ end }}
+    {{ else if ne $link "" }}
+      {{ $other_links = $other_links | append $link }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+<div class="exercise">
+  <div class="exercise-main">
+  {{ if $weights }}
+  <div class="exercise-sets-wrap">
+    <table class="exercise-sets">
+      {{/* Brackets hold the planned scheme ("[5x6]"), sometimes followed by a
+           note ("[3x15, mniejszy ciężar]"). Only the scheme is set in caps. */}}
+      {{ with $scheme }}
+        {{ $parts := split . "," }}
+        {{ $head := strings.TrimSpace (index $parts 0) }}
+        {{ $rest := "" }}
+        {{ if gt (len $parts) 1 }}{{ $rest = strings.TrimSpace (delimit (after 1 $parts) ", ") }}{{ end }}
+        {{ $is_scheme := findRE `^[0-9]+ ?x ?([0-9]+|max|maks)$` $head 1 }}
+        <caption>
+          {{- if $is_scheme -}}
+            <span class="exercise-sets__scheme">{{ $head }}</span>
+            {{- with $rest }} <span class="exercise-sets__note">{{ . }}</span>{{ end -}}
+          {{- else -}}
+            <span class="exercise-sets__note">{{ . }}</span>
+          {{- end -}}
+        </caption>
+      {{ end }}
+      <thead>
+        <tr>
+          <th scope="col">Seria</th>
+          <th scope="col">Ciężar</th>
+          <th scope="col">{{ if $is_time }}Czas{{ else }}Powt.{{ end }}</th>
+          {{ if $reserve }}<th scope="col" title="Zapas — ile jeszcze zostało">Zapas</th>{{ end }}
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $i, $w := $weights }}
+        <tr>
+          <td class="exercise-sets__n">{{ add $i 1 }}</td>
+          <td>{{ if eq $w "0" }}bez{{ else }}{{ $w }} kg{{ end }}</td>
+          <td>
+            {{- if lt $i (len $reps) -}}
+              {{ index $reps $i }}{{ if $is_time }} s{{ end }}
+            {{- else -}}
+              –
+            {{- end -}}
+          </td>
+          {{ if $reserve }}
+          <td class="exercise-sets__rir">
+            {{- if lt $i (len $reserve) }}{{ index $reserve $i }}{{ else }}–{{ end -}}
+          </td>
+          {{ end }}
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+  {{ end }}
+
+  {{ with $comment }}
+  <p class="exercise-comment"><strong>Komentarz:</strong> {{ . }}</p>
+  {{ end }}
+  </div>
+
+  {{ if $video_ids }}
   <div class="exercise-videos">
     {{ range $video_ids }}
-    <iframe
-      width="432"
-      height="768"
-      src="https://www.youtube.com/embed/{{ . }}"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-    ></iframe>
+    <button
+      type="button"
+      class="exercise-video"
+      data-video-id="{{ . }}"
+      aria-label="Odtwórz nagranie serii"
+    >
+      <img
+        src="https://i.ytimg.com/vi/{{ . }}/hqdefault.jpg"
+        width="480"
+        height="360"
+        loading="lazy"
+        decoding="async"
+        alt=""
+      />
+      <span class="exercise-video__play" aria-hidden="true">
+        <svg viewBox="0 0 68 48" width="52" height="37">
+          <path
+            d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.8 0 34 0 34 0S12.2 0 7.5 1.7a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.2 48 34 48 34 48s21.8 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z"
+            fill="rgba(0,0,0,0.65)"
+          />
+          <path d="M27 34l18-10-18-10z" fill="#fff" />
+        </svg>
+      </span>
+    </button>
     {{ end }}
   </div>
-  {{ end }} {{ range $other_links }}
-  <a href="{{ . }}" target="_blank">{{ . }}</a><br />
+  {{ end }}
+
+  {{ range $other_links }}
+  <a class="exercise-link" href="{{ . }}" target="_blank" rel="noopener">{{ . }}</a>
   {{ end }}
 </div>

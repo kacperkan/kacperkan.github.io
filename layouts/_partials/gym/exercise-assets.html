@@ -1,0 +1,191 @@
+{{/* Styles + behaviour for the exercise shortcode.
+
+  Included once per page by the gym layouts rather than emitted from the
+  shortcode itself: a shortcode-side "only the first call renders this" guard
+  breaks whenever Hugo renders the page's content more than once (RSS, list
+  summaries, server rebuilds), silently dropping the CSS.
+*/}}
+<style>
+  .exercise {
+    margin: 0.75rem 0 1.75rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .exercise-sets-wrap {
+    overflow-x: auto;
+    max-width: 32rem;
+  }
+  /* Wide screens: numbers on the left, clips on the right, instead of one
+     narrow column with half the page empty. */
+  /* Two columns as soon as there is room for them, with proportional tracks so
+     the clip shrinks with the window instead of dropping below the table.
+     Tracks are fr-based (not content-sized) so every exercise on the page lines
+     up, whether or not it has a comment. */
+  @media (min-width: 40rem) {
+    .exercise {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 0.75rem 1.25rem;
+      align-items: start;
+    }
+    .exercise-videos {
+      margin-top: 0;
+    }
+  }
+  .exercise-sets {
+    /* prose sets tables to width:100% — a set table should be as wide as its numbers */
+    width: auto;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .exercise-sets caption {
+    caption-side: top;
+    text-align: left;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    padding-bottom: 0.3rem;
+  }
+  .exercise-sets__scheme {
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .exercise-sets__note {
+    font-style: italic;
+  }
+  .exercise-sets th,
+  .exercise-sets td {
+    padding: 0.25rem 0.9rem 0.25rem 0;
+    text-align: right;
+    border: 0;
+    white-space: nowrap;
+  }
+  .exercise-sets th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    border-bottom: 1px solid rgba(120, 120, 120, 0.3);
+  }
+  .exercise-sets tbody tr + tr td {
+    border-top: 1px solid rgba(120, 120, 120, 0.15);
+  }
+  .exercise-sets__n,
+  .exercise-sets th:first-child {
+    text-align: left;
+    opacity: 0.55;
+  }
+  .exercise-sets__rir {
+    opacity: 0.7;
+  }
+  .exercise-comment {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    /* keeps the text track hugging its content in the two-column layout */
+    max-width: 26rem;
+  }
+  .exercise-videos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    justify-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+  }
+  .exercise-video {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 9 / 16;
+    padding: 0;
+    border: 0;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    background: rgba(127, 127, 127, 0.15);
+    cursor: pointer;
+  }
+  .exercise-video img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin: 0;
+    display: block;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .exercise-video:hover img {
+    transform: scale(1.03);
+    opacity: 0.85;
+  }
+  .exercise-video__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .exercise-video:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.85);
+    outline-offset: 2px;
+  }
+  .exercise-video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .exercise-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+  @media (max-width: 40rem) {
+    .exercise-videos {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .exercise-video img {
+      transition: none;
+    }
+    .exercise-video:hover img {
+      transform: none;
+    }
+  }
+</style>
+<script>
+  // hqdefault is missing for some clips — fall back once, then leave the placeholder
+  document.addEventListener(
+    "error",
+    function (e) {
+      var img = e.target;
+      if (!img || img.tagName !== "IMG" || !img.closest(".exercise-video")) return;
+      if (img.dataset.fallback) {
+        img.style.display = "none";
+        return;
+      }
+      img.dataset.fallback = "1";
+      img.src = img.src.replace("/hqdefault.jpg", "/mqdefault.jpg");
+    },
+    true
+  );
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest(".exercise-video");
+    if (!btn || btn.dataset.loaded) return;
+    var id = btn.dataset.videoId;
+    if (!id) return;
+    btn.dataset.loaded = "1";
+    var frame = document.createElement("iframe");
+    frame.src = "https://www.youtube.com/embed/" + id + "?autoplay=1&rel=0";
+    frame.title = "Nagranie serii";
+    frame.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    frame.allowFullscreen = true;
+    btn.appendChild(frame);
+  });
+</script>

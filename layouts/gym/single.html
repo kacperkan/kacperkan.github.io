@@ -1,0 +1,143 @@
+{{/* layouts/gym/single.html
+
+  A single training day. Lean version of the theme's article layout — no
+  authors, no publication metadata, none of which applies to a workout — plus
+  navigation to the previous/next training day so the log can be walked
+  through without going back to the index.
+*/}}
+{{ define "main" }}
+
+{{ $days := (where site.RegularPages "Section" "gym").ByDate }}
+{{ $prev := "" }}
+{{ $next := "" }}
+{{ $current := . }}
+{{ range $i, $p := $days }}
+  {{ if eq $p $current }}
+    {{ if gt $i 0 }}{{ $prev = index $days (sub $i 1) }}{{ end }}
+    {{ if lt (add $i 1) (len $days) }}{{ $next = index $days (add $i 1) }}{{ end }}
+  {{ end }}
+{{ end }}
+
+<div class="mx-auto w-full max-w-5xl px-6 pb-16 pt-4 md:px-12">
+  {{/* The theme breadcrumb renders as 14px gray-400 — too small a target and
+       below 4.5:1 on the light surface. A plain back link does the same job. */}}
+  <a class="gym-back" href="{{ .Parent.RelPermalink }}">← {{ .Parent.LinkTitle }}</a>
+
+  <h1 class="mt-2 text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+    {{ .Title }}
+  </h1>
+  {{/* The title carries the training date; .Date is when the note was written. */}}
+  <div class="mt-2 mb-8 text-sm text-gray-500 dark:text-gray-300">
+    zapisano {{ .Date.Format "02.01.2006" }}
+  </div>
+
+  <div class="prose prose-slate dark:prose-invert max-w-none">
+    {{ .Content }}
+  </div>
+  {{ partial "gym/exercise-assets.html" . }}
+
+  <nav class="gym-pager" aria-label="Nawigacja między treningami">
+    <div class="gym-pager__side">
+      {{ with $prev }}
+      <a class="gym-pager__link" href="{{ .RelPermalink }}" rel="prev">
+        <span class="gym-pager__dir">← Poprzedni</span>
+        <span class="gym-pager__title">{{ .Title }}</span>
+      </a>
+      {{ end }}
+    </div>
+    <a class="gym-pager__index" href="{{ .Parent.RelPermalink }}">Wszystkie treningi</a>
+    <div class="gym-pager__side gym-pager__side--end">
+      {{ with $next }}
+      <a class="gym-pager__link" href="{{ .RelPermalink }}" rel="next">
+        <span class="gym-pager__dir">Następny →</span>
+        <span class="gym-pager__title">{{ .Title }}</span>
+      </a>
+      {{ end }}
+    </div>
+  </nav>
+</div>
+
+<style>
+  .gym-back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    margin-bottom: 0.25rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    color: inherit;
+    opacity: 0.85;
+    text-decoration: none;
+  }
+  .gym-back:hover,
+  .gym-back:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .gym-pager {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(120, 120, 120, 0.25);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .gym-pager__side {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .gym-pager__side--end {
+    text-align: right;
+  }
+  .gym-pager__link {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0.4rem 0.6rem;
+    margin: -0.4rem -0.6rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+  }
+  .gym-pager__link:hover,
+  .gym-pager__link:focus-visible {
+    background: rgba(127, 127, 127, 0.1);
+  }
+  .gym-pager__dir {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+  .gym-pager__title {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gym-pager__index {
+    flex: none;
+    font-size: 0.82rem;
+    opacity: 0.7;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: inherit;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gym-pager__link {
+      transition: none;
+    }
+  }
+  @media (max-width: 40rem) {
+    .gym-pager__index {
+      display: none;
+    }
+  }
+</style>
+
+{{ end }}

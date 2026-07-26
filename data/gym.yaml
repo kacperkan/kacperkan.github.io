@@ -1,0 +1,75 @@
+# Deterministic exercise-name clustering rules for /gym.
+#
+# Exercise names are typed by hand in the notes, so the same lift shows up
+# under several spellings ("ze stangą" / "ze sztangą", "szeroko" / "szerokim
+# chwytem", "hantli" / "hantlami"). These rules fold those variants into one
+# cluster. The pipeline is fixed and runs in exactly this order — same input
+# always produces the same cluster key:
+#
+#   1. strip the trailing set/weight scheme  ("Przysiady low bar 70 80 90x3" -> "Przysiady low bar")
+#   2. lowercase, strip diacritics, ł -> l   ("Ściąganie" -> "sciaganie")
+#   3. `phrases`  — multi-word replacements, longest phrase first
+#   4. `spelling` — single-token replacements (typos + declensions)
+#   5. drop `stopwords`
+#   6. `aliases`  — whole-name overrides, applied to the token string
+#   7. de-duplicate tokens, sort alphabetically -> cluster key
+#
+# The visible label for a cluster is chosen deterministically:
+#   most frequent spelling -> the one needing no spelling fix -> longest -> alphabetically first.
+# `display` overrides that choice outright.
+
+# Multi-word phrases, matched on whole words. Longest phrase wins.
+phrases:
+  szerokim chwytem: szeroko
+  szerokim uchwytem: szeroko
+  waskim chwytem: wasko
+  waskim uchwytem: wasko
+  lawce skosnej: skosie
+  lawce poziomej: poziomo
+  drazka wyciagu gornego: drazka
+  wyciagu gornego: wyciag
+  na wyciagu: wyciag
+
+# Single tokens: typos and Polish declensions folded to one form.
+spelling:
+  stanga: sztanga
+  stangi: sztanga
+  stange: sztanga
+  sztangi: sztanga
+  sztange: sztanga
+  hantla: hantel
+  hantle: hantel
+  hantli: hantel
+  hantlem: hantel
+  hantlami: hantel
+  linkami: linka
+  linkach: linka
+  thusters: thrusters
+  thuster: thrusters
+
+# Dropped before the tokens are sorted — they carry no identity.
+stopwords:
+  - z
+  - ze
+  - w
+  - we
+  - na
+  - do
+  - i
+  - oraz
+  - przy
+  - po
+
+# Whole-name overrides. Key is the token string *after* steps 1-5 (space
+# separated, original order); value is the token string it should become.
+# Use for merges the mechanical rules cannot reach.
+aliases: {}
+
+# Force the visible label for a cluster. Key is the final cluster key
+# (tokens sorted alphabetically, space separated); value is the label to show.
+display:
+  przodu przysiady sztanga: Przysiady ze sztangą z przodu
+  hantel skosie wyciskanie: Wyciskanie hantli na skosie
+  hantel skosie wioslowanie: Wiosłowanie hantlami na skosie
+  press kenelly: Kenelly press
+  thrusters: Thrusters

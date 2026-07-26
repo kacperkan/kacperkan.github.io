@@ -1,0 +1,20 @@
+{{/* Polish plural form for a count.
+
+  Call: {{ partial "gym/plural.html" (dict "n" 3 "forms" (slice "ćwiczenie" "ćwiczenia" "ćwiczeń")) }}
+    n = 1                              -> forms[0]  (1 ćwiczenie)
+    n % 10 in 2..4, n % 100 not 12..14 -> forms[1]  (3 ćwiczenia)
+    otherwise                          -> forms[2]  (7 ćwiczeń)
+*/}}
+{{ $n := .n }}
+{{ $f := .forms }}
+{{ $mod10 := mod $n 10 }}
+{{ $mod100 := mod $n 100 }}
+{{ $form := index $f 2 }}
+{{ if eq $n 1 }}
+  {{ $form = index $f 0 }}
+{{ else if and (ge $mod10 2) (le $mod10 4) }}
+  {{ if not (and (ge $mod100 12) (le $mod100 14)) }}
+    {{ $form = index $f 1 }}
+  {{ end }}
+{{ end }}
+{{ return $form }}

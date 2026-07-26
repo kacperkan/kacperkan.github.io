@@ -1,0 +1,12 @@
+{{/* Returns the exercises of a gym page as a slice of dicts: {n: name, c: cell_data}.
+
+  Names live in the markdown as "<n>. <name>" / "- <name>" lines directly above
+  the exercise shortcode, so they are read straight out of the raw content.
+  Call with the page as the context: {{ partial "gym/exercises.html" . }}
+*/}}
+{{ $re := `(?:^|\n)(?:[0-9]+\.|-)[ \t]+([^\n]+)\n[ \t]*\{\{<[\s]*exercise[ \t\n]+cell_data="([^"]*)"` }}
+{{ $exercises := slice }}
+{{ range findRESubmatch $re .RawContent }}
+  {{ $exercises = $exercises | append (dict "n" (index . 1 | strings.TrimSpace) "c" (index . 2)) }}
+{{ end }}
+{{ return $exercises }}

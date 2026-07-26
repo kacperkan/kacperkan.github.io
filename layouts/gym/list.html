@@ -1,0 +1,290 @@
+{{/* layouts/gym/list.html
+
+  Training-log index: the search widget (from the section's own content) plus
+  every training day grouped by month, newest first. The theme's default list
+  renders these as APA citations ("(2026). 19.07.2026 – B."), which says
+  nothing useful about a workout — this shows the session letter and the lifts
+  that were actually done instead.
+*/}}
+{{ define "main" }}
+
+<div class="mx-auto w-full max-w-5xl px-6 pb-16 pt-4 md:px-12">
+  <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 lg:text-6xl">
+    {{ .Title }}
+  </h1>
+
+  {{ with .Content }}
+  <div class="prose prose-slate dark:prose-invert max-w-none">{{ . }}</div>
+  {{ end }}
+
+  {{/* Rendered here rather than from the section's content so the sticky search
+       field can stick for the whole length of the day list. */}}
+  <div class="gym-content">{{ partial "gym/search.html" . }}</div>
+
+  {{/* Notes are dated a day or two after the session, so months are grouped by
+       the training date in the title ("27.06.2026 – A"), not by .Date. */}}
+  {{ $months := slice "styczeń" "luty" "marzec" "kwiecień" "maj" "czerwiec" "lipiec" "sierpień" "wrzesień" "październik" "listopad" "grudzień" }}
+  {{ $pages := .Pages.ByDate.Reverse }}
+
+  {{/* Session letters present in the log, for the filter chips. */}}
+  {{ $letters := slice }}
+  {{ range $pages }}
+    {{ with findRE `[A-Z]\s*$` .Title 1 }}
+      {{ $l := strings.TrimSpace (index . 0) }}
+      {{ if not (in $letters $l) }}{{ $letters = $letters | append $l }}{{ end }}
+    {{ end }}
+  {{ end }}
+  {{ if gt (len $letters) 1 }}
+  <div class="gym-filter" role="group" aria-label="Filtruj po sesji">
+    <button type="button" class="gym-filter__chip is-active" data-letter="" aria-pressed="true">
+      Wszystkie <span class="gym-filter__n">{{ len $pages }}</span>
+    </button>
+    {{ range sort $letters }}
+      {{ $l := . }}
+      {{ $n := len (where $pages "Title" "like" (printf `%s$` $l)) }}
+      <button type="button" class="gym-filter__chip" data-letter="{{ $l }}" aria-pressed="false">
+        {{ $l }} <span class="gym-filter__n">{{ $n }}</span>
+      </button>
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <div class="gym-days">
+    {{ $month := "" }}
+    {{ range $pages }}
+      {{ $title_date := index (findRESubmatch `^([0-9]{2})\.([0-9]{2})\.([0-9]{4})` .Title 1) 0 }}
+      {{ $m := "" }}
+      {{ $month_label := "" }}
+      {{ if $title_date }}
+        {{ $m = printf "%s-%s" (index $title_date 3) (index $title_date 2) }}
+        {{ $month_label = printf "%s %s" (index $months (sub (int (index $title_date 2)) 1)) (index $title_date 3) }}
+      {{ else }}
+        {{ $m = .Date.Format "2006-01" }}
+        {{ $month_label = .Date.Format "January 2006" }}
+      {{ end }}
+      {{ if ne $m $month }}
+        {{ if ne $month "" }}</ul>{{ end }}
+        {{ $month = $m }}
+        <h2 class="gym-days__month">{{ $month_label }}</h2>
+        <ul class="gym-days__list">
+      {{ end }}
+
+      {{/* Session letter: the "– A" / "– B" suffix of the title. */}}
+      {{ $letter := "" }}
+      {{ with findRE `[–-]\s*([A-Z])\s*$` .Title 1 }}
+        {{ $letter = index (findRE `[A-Z]\s*$` (index . 0) 1) 0 | strings.TrimSpace }}
+      {{ end }}
+
+      {{/* Headline lifts of the day, deduplicated, first three. */}}
+      {{ $names := slice }}
+      {{ range partial "gym/exercises.html" . }}
+        {{ $n := replaceRE `\s+(?:[0-9]\S*|max|maks)(?:\s+(?:[0-9]\S*|max|maks))*\s*$` "" .n }}
+        {{ $n = strings.TrimRight " :,-" $n }}
+        {{ if and (ne $n "") (not (in $names $n)) }}{{ $names = $names | append $n }}{{ end }}
+      {{ end }}
+
+      <li class="gym-day" data-letter="{{ $letter }}">
+        <a class="gym-day__link" href="{{ .RelPermalink }}">
+          <span class="gym-day__head">
+            {{ with $letter }}<span class="gym-day__letter">{{ . }}</span>{{ end }}
+            <span class="gym-day__title">{{ .Title }}</span>
+            {{ with $names }}<span class="gym-day__count">{{ len . }} {{ partial "gym/plural.html" (dict "n" (len .) "forms" (slice "ćwiczenie" "ćwiczenia" "ćwiczeń")) }}</span>{{ end }}
+          </span>
+          {{ with $names }}
+          <span class="gym-day__lifts">
+            {{ delimit (first 3 .) " · " }}{{ if gt (len .) 3 }} …{{ end }}
+          </span>
+          {{ end }}
+        </a>
+      </li>
+    {{ end }}
+    {{ if ne $month "" }}</ul>{{ end }}
+  </div>
+</div>
+
+<script>
+  (function () {
+    var chips = document.querySelectorAll(".gym-filter__chip");
+    if (!chips.length) return;
+    var days = document.querySelectorAll(".gym-day");
+    var groups = document.querySelectorAll(".gym-days__list");
+
+    function apply(letter) {
+      days.forEach(function (day) {
+        day.hidden = letter !== "" && day.dataset.letter !== letter;
+      });
+      // hide a month heading once every day under it is filtered out
+      groups.forEach(function (list) {
+        var visible = Array.prototype.some.call(list.children, function (li) {
+          return !li.hidden;
+        });
+        list.hidden = !visible;
+        var heading = list.previousElementSibling;
+        if (heading && heading.classList.contains("gym-days__month")) heading.hidden = !visible;
+      });
+      chips.forEach(function (c) {
+        var on = c.dataset.letter === letter;
+        c.classList.toggle("is-active", on);
+        c.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      var url = location.pathname + (letter ? "?s=" + letter : "");
+      history.replaceState(null, "", url);
+    }
+
+    chips.forEach(function (c) {
+      c.addEventListener("click", function () {
+        apply(c.dataset.letter);
+      });
+    });
+
+    var initial = new URLSearchParams(location.search).get("s");
+    if (initial) apply(initial.toUpperCase());
+  })();
+</script>
+
+<style>
+  .gym-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.75rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .gym-filter__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(120, 120, 120, 0.35);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .gym-filter__chip:hover {
+    border-color: rgba(120, 120, 120, 0.7);
+  }
+  .gym-filter__chip:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.85);
+    outline-offset: 2px;
+  }
+  .gym-filter__chip.is-active {
+    background: rgba(127, 127, 127, 0.18);
+    border-color: transparent;
+    font-weight: 600;
+  }
+  .gym-filter__n {
+    font-size: 0.78em;
+    opacity: 0.65;
+    font-variant-numeric: tabular-nums;
+  }
+  /* `display: contents` drops these wrappers' boxes so the sticky field below
+     takes the page container as its containing block — otherwise it could only
+     stick within the 64px-tall widget itself. Inherited styles still apply. */
+  .gym-content,
+  .gym-content .gym-search {
+    display: contents;
+  }
+  .gym-content .gym-search__meta {
+    margin-top: 0.2rem;
+  }
+  /* The log is one long page — keep the field reachable while scrolling.
+     `Canvas` follows the theme's color-scheme, so it stays opaque in both modes. */
+  .gym-content .gym-search__field {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 0.5rem 0;
+    background-color: #fff;
+    background-color: Canvas;
+    box-shadow: 0 1px 0 rgba(120, 120, 120, 0.18);
+  }
+  .gym-content .gym-search__icon {
+    top: calc(50% + 0.05rem);
+  }
+  .gym-days {
+    margin-top: 2.5rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .gym-days__month {
+    margin: 2rem 0 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+  .gym-days__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(120, 120, 120, 0.2);
+  }
+  .gym-day {
+    border-bottom: 1px solid rgba(120, 120, 120, 0.2);
+  }
+  .gym-day__link {
+    display: block;
+    padding: 0.7rem 0.25rem;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 0.4rem;
+    transition: background 0.15s ease;
+  }
+  .gym-day__link:hover,
+  .gym-day__link:focus-visible {
+    background: rgba(127, 127, 127, 0.09);
+  }
+  .gym-day__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .gym-day__letter {
+    flex: none;
+    min-width: 1.6rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 0.35rem;
+    background: rgba(127, 127, 127, 0.16);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  .gym-day__title {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .gym-day__count {
+    margin-left: auto;
+    font-size: 0.78rem;
+    opacity: 0.55;
+    white-space: nowrap;
+  }
+  .gym-day__lifts {
+    display: block;
+    margin-top: 0.2rem;
+    padding-left: 2.2rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    overflow-wrap: anywhere;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gym-day__link,
+    .gym-filter__chip {
+      transition: none;
+    }
+  }
+  @media (max-width: 40rem) {
+    .gym-day__lifts {
+      padding-left: 0;
+    }
+  }
+</style>
+
+{{ end }}
