@@ -78,21 +78,13 @@
   <div class="exercise-sets-wrap">
     <table class="exercise-sets">
       {{/* Brackets hold the planned scheme ("[5x6]"), sometimes followed by a
-           note ("[3x15, mniejszy ciężar]"). Only the scheme is set in caps. */}}
+           private training note ("[3x15, mniejszy ciężar]") — only the scheme
+           is shown, notes stay off the page. */}}
       {{ with $scheme }}
-        {{ $parts := split . "," }}
-        {{ $head := strings.TrimSpace (index $parts 0) }}
-        {{ $rest := "" }}
-        {{ if gt (len $parts) 1 }}{{ $rest = strings.TrimSpace (delimit (after 1 $parts) ", ") }}{{ end }}
-        {{ $is_scheme := findRE `^[0-9]+ ?x ?([0-9]+|max|maks)$` $head 1 }}
-        <caption>
-          {{- if $is_scheme -}}
-            <span class="exercise-sets__scheme">{{ $head }}</span>
-            {{- with $rest }} <span class="exercise-sets__note">{{ . }}</span>{{ end -}}
-          {{- else -}}
-            <span class="exercise-sets__note">{{ . }}</span>
-          {{- end -}}
-        </caption>
+        {{ $head := strings.TrimSpace (index (split . ",") 0) }}
+        {{ if findRE `^[0-9]+ ?x ?([0-9]+|max|maks)$` $head 1 }}
+          <caption><span class="exercise-sets__scheme">{{ $head }}</span></caption>
+        {{ end }}
       {{ end }}
       <thead>
         <tr>

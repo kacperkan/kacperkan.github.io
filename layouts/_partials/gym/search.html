@@ -243,8 +243,13 @@
     --gym-surface: Canvas;
     --gym-grid: rgba(120, 120, 120, 0.35);
   }
+  .gym-search {
+    /* second series (volume) — validated against both surfaces alongside the blue */
+    --gym-series-2: #eb6834;
+  }
   :root.dark .gym-search {
     --gym-series: #3987e5;
+    --gym-series-2: #d95926;
   }
   .gym-chart {
     margin: 0.5rem 0 0.25rem 1.5rem;
@@ -259,6 +264,12 @@
   }
   .gym-chart__plot {
     position: relative;
+    /* row reserved for the hover tooltip so it never lands on the first panel */
+    padding-top: 1.35rem;
+  }
+  .gym-chart__plot:has(.gym-chart__tip.is-below) {
+    padding-top: 0;
+    padding-bottom: 1.5rem;
   }
   .gym-chart svg {
     /* viewBox is in CSS px (see measureChart) — never stretch it */
@@ -266,6 +277,38 @@
     width: 100%;
     height: auto;
     overflow: visible;
+  }
+  .gym-chart__panel {
+    fill: currentColor;
+    font-size: 11px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    opacity: 0.6;
+  }
+  .gym-chart__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.9rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+  .gym-chart__key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .gym-chart__swatch {
+    width: 0.85rem;
+    height: 0.2rem;
+    border-radius: 999px;
+    background: var(--gym-series);
+  }
+  .gym-chart__swatch.s1,
+  .gym-chart__line.s1,
+  .gym-chart__dot.s1 {
+    background: var(--gym-series-2);
   }
   .gym-chart__line {
     fill: none;
@@ -277,6 +320,14 @@
   }
   .gym-chart__dot {
     fill: var(--gym-series);
+  }
+  .gym-chart__line.s1 {
+    stroke: var(--gym-series-2);
+    background: none;
+  }
+  .gym-chart__dot.s1 {
+    fill: var(--gym-series-2);
+    background: none;
   }
   .gym-chart__dot.is-key {
     stroke: var(--gym-surface);
@@ -310,22 +361,29 @@
     font-weight: 600;
     opacity: 0.85;
   }
-  .gym-chart__value.is-muted {
+  .gym-chart__value.s1 {
     font-weight: 500;
-    opacity: 0.6;
+    opacity: 0.7;
+  }
+  .gym-chart__line--gap {
+    stroke-dasharray: 4 5;
+    opacity: 0.45;
   }
   .gym-chart__hit {
     fill: transparent;
+    cursor: pointer;
   }
   .gym-chart__tip {
     position: absolute;
-    top: -0.4rem;
+    top: 0;
+    max-width: 100%;
+    white-space: normal;
+    font-variant-numeric: tabular-nums;
     transform: translateX(-50%);
     padding: 0.15rem 0.45rem;
     border-radius: 0.35rem;
     background: rgba(127, 127, 127, 0.22);
     font-size: 0.75rem;
-    white-space: nowrap;
     pointer-events: none;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -333,6 +391,16 @@
     .gym-search__day-link {
       transition: none;
     }
+  }
+  /* too narrow for a floating tooltip — read the values out underneath */
+  .gym-chart__tip.is-below {
+    position: static;
+    transform: none;
+    display: block;
+    margin-top: 0.35rem;
+    padding: 0;
+    background: transparent;
+    opacity: 0.85;
   }
   .gym-search mark {
     background: rgba(250, 204, 21, 0.35);
@@ -483,11 +551,25 @@
         }
         g.labels.set(label, (g.labels.get(label) || 0) + 1);
         var sets = parseCell(ex.c);
-        var reps = sets.reps.reduce(function (a, r) {
-          var v = parseFloat(r);
-          return a + (isNaN(v) ? 0 : v);
-        }, 0);
-        g.days.push({ t: day.t, u: day.u, d: day.d, raw: ex.n, c: ex.c, top: sets.top, reps: reps });
+        var reps = 0;
+        var volume = 0; // Σ weight × reps over the sets — the session's total work
+        sets.reps.forEach(function (r, i) {
+          var rv = parseFloat(r);
+          if (isNaN(rv)) return;
+          reps += rv;
+          var wv = parseFloat(sets.weights[i]);
+          if (!isNaN(wv)) volume += wv * rv;
+        });
+        g.days.push({
+          t: day.t,
+          u: day.u,
+          d: day.d,
+          raw: ex.n,
+          c: ex.c,
+          top: sets.top,
+          reps: reps,
+          vol: volume,
+        });
       });
     });
 
@@ -614,21 +696,42 @@
     }
 
     /* ---- progression chart ---------------------------------------------
-       One series (top set per session) over time, so: no legend, the heading
-       names it. 2px line, hairline min/max gridlines, dots ringed in the
-       surface colour, only the record and the last session direct-labelled.
-       Values are also in the day list underneath — that is the table view.
-       Exercises done without load (bodyweight) plot total reps instead;
-       never two scales on one chart.                                       */
+       Top set (kg) and session volume (Σ weight × reps, kg) differ by an order
+       of magnitude — ~130 vs ~1800 — so they get one panel each, stacked and
+       sharing the x axis, rather than two y-axes on one plot: with a second
+       axis, where the lines cross is an artefact of the scaling, not the data.
+       Each panel keeps its real units, so no mental conversion is needed.
+
+       2px lines, hairline min/max gridlines, dots ringed in the surface colour,
+       each panel labelled directly (that is the legend), end value on the last
+       point. Values are also in the day list below — that is the table view.
+       Bodyweight exercises have no load, so they get a single reps panel.    */
     // The viewBox is sized to the rendered width so 1 unit == 1 CSS px and the
     // labels keep their real size instead of shrinking with the chart.
     var CHART = { w: 720, h: 132, padL: 46, padR: 58, padT: 16, padB: 22 };
     function measureChart() {
       var avail = (out.clientWidth || 720) - 24 /* left indent */ - 32 /* panel padding */;
       CHART.w = Math.max(280, Math.min(736, avail));
-      CHART.h = CHART.w < 420 ? 116 : 132;
-      CHART.padL = CHART.w < 420 ? 34 : 46;
+      CHART.h = CHART.w < 420 ? 124 : 140;
+      CHART.padL = CHART.w < 420 ? 38 : 50;
       CHART.padR = CHART.w < 420 ? 44 : 58;
+    }
+
+    function fmt(v) {
+      return String(Math.round(v * 10) / 10);
+    }
+    // 2940 -> "2 940" (thousands grouped, no locale surprises)
+    function fmtBig(v) {
+      var n = Math.round(v);
+      var out = "", str = String(n);
+      for (var i = 0; i < str.length; i++) {
+        if (i && (str.length - i) % 3 === 0) out += "\u00a0";
+        out += str[i];
+      }
+      return out;
+    }
+    function fmtValue(v, unit) {
+      return (v >= 1000 ? fmtBig(v) : fmt(v)) + " " + unit;
     }
 
     function chartSeries(g) {
@@ -637,124 +740,184 @@
         .reverse() // days are newest-first; a time axis runs the other way
         .map(function (d) {
           var t = Date.parse(d.d);
-          return { t: isNaN(t) ? null : t, top: d.top, reps: d.reps, label: d.t };
+          return { t: isNaN(t) ? null : t, top: d.top, reps: d.reps, vol: d.vol, label: d.t, u: d.u };
         })
         .filter(function (p) {
           return p.t !== null;
         });
-      return {
-        unit: g.unit,
-        loaded: g.loaded,
-        points: points.map(function (p) {
-          return { t: p.t, v: g.loaded ? p.top : p.reps, label: p.label };
-        }),
-      };
-    }
+      if (!points.length) return null;
 
-    function fmt(v) {
-      return String(Math.round(v * 10) / 10);
+      if (!g.loaded) {
+        return {
+          unit: "powt.",
+          series: [{ name: "suma powtórzeń", panel: "suma powtórzeń", unit: "powt.", key: "reps" }],
+          points: points,
+        };
+      }
+      var hasVolume = points.some(function (p) {
+        return p.vol > 0;
+      });
+      if (!hasVolume) {
+        return {
+          unit: "kg",
+          series: [{ name: "najcięższa seria", panel: "najcięższa seria · kg", unit: "kg", key: "top" }],
+          points: points,
+        };
+      }
+      return {
+        unit: "kg",
+        series: [
+          { name: "najcięższa seria", panel: "najcięższa seria · kg", unit: "kg", key: "top" },
+          { name: "objętość", panel: "objętość (Σ ciężar × powt.) · kg", unit: "kg", key: "vol" },
+        ],
+        points: points,
+      };
     }
 
     function buildChart(g) {
       var s = chartSeries(g);
-      var pts = s.points.filter(function (p) {
-        return typeof p.v === "number" && !isNaN(p.v);
-      });
-      if (pts.length < 2) return "";
+      if (!s || s.points.length < 2) return "";
 
-      var xs = pts.map(function (p) { return p.t; });
-      var vs = pts.map(function (p) { return p.v; });
+      var tracks = s.series.map(function (def, si) {
+        return {
+          def: def,
+          index: si,
+          values: s.points.map(function (p) {
+            var v = p[def.key];
+            return typeof v === "number" && !isNaN(v) ? v : 0;
+          }),
+        };
+      });
+
+      var xs = s.points.map(function (p) {
+        return p.t;
+      });
       var minT = Math.min.apply(null, xs), maxT = Math.max.apply(null, xs);
-      var minV = Math.min.apply(null, vs), maxV = Math.max.apply(null, vs);
-      var span = maxV - minV || Math.max(1, maxV * 0.1);
-      var lo = minV - span * 0.15, hi = maxV + span * 0.15;
-      var best = Math.max.apply(null, vs);
-      // reserve exactly as much right margin as the end label needs
-      var endLabel = fmt(vs[vs.length - 1]) + " " + s.unit;
-      var padR = Math.max(CHART.padR, 14 + 6.6 * endLabel.length);
+      var lastIdx = s.points.length - 1;
+
+      // right margin fits the widest end label
+      var endLabels = tracks.map(function (tr) {
+        return fmtValue(tr.values[lastIdx], tr.def.unit);
+      });
+      var widest = endLabels.reduce(function (a, b) {
+        return b.length > a.length ? b : a;
+      }, "");
+      var padR = Math.max(CHART.padR, 14 + 6.6 * widest.length);
       var innerW = CHART.w - CHART.padL - padR;
-      var innerH = CHART.h - CHART.padT - CHART.padB;
+
+      var panelH = CHART.w < 420 ? 66 : 80;
+      var panelGap = 26; // room for the next panel's own caption
+      var height = CHART.padT + tracks.length * panelH + (tracks.length - 1) * panelGap + CHART.padB;
 
       function x(t) {
         return CHART.padL + (maxT === minT ? innerW / 2 : ((t - minT) / (maxT - minT)) * innerW);
       }
-      function y(v) {
-        return CHART.padT + innerH - ((v - lo) / (hi - lo)) * innerH;
-      }
 
-      var bestIdx = vs.lastIndexOf(best);
-      var lastIdx = pts.length - 1;
+      var body = tracks
+        .map(function (tr) {
+          var top = CHART.padT + tr.index * (panelH + panelGap);
+          var vs = tr.values;
+          var minV = Math.min.apply(null, vs), maxV = Math.max.apply(null, vs);
+          var span = maxV - minV || Math.max(1, maxV * 0.1);
+          var lo = minV - span * 0.15, hi = maxV + span * 0.15;
+          function y(v) {
+            return top + panelH - ((v - lo) / (hi - lo)) * panelH;
+          }
+          tr.y = y; // reused by the shared hover layer
 
-      var d = pts
-        .map(function (p, i) {
-          return (i ? "L" : "M") + fmt(x(p.t)) + " " + fmt(y(p.v));
-        })
-        .join(" ");
+          var best = maxV;
+          // training breaks: gaps longer than 2 weeks get a dashed connector
+          // instead of a solid segment
+          var GAP = 14 * 24 * 60 * 60 * 1000;
+          var d = "";
+          var dGap = "";
+          vs.forEach(function (v, i) {
+            var pt = fmt(x(s.points[i].t)) + " " + fmt(y(v));
+            if (i === 0) {
+              d += "M" + pt;
+            } else if (s.points[i].t - s.points[i - 1].t > GAP) {
+              dGap += "M" + fmt(x(s.points[i - 1].t)) + " " + fmt(y(vs[i - 1])) + " L" + pt;
+              d += " M" + pt;
+            } else {
+              d += " L" + pt;
+            }
+          });
+          var dots = vs
+            .map(function (v, i) {
+              var key = i === lastIdx || v === best;
+              return (
+                '<circle class="gym-chart__dot s' + tr.index + (key ? " is-key" : "") +
+                '" cx="' + fmt(x(s.points[i].t)) + '" cy="' + fmt(y(v)) + '" r="' + (key ? 4 : 2.5) + '"></circle>'
+              );
+            })
+            .join("");
 
-      var dots = pts
-        .map(function (p, i) {
-          var emphasis = i === bestIdx || i === lastIdx;
           return (
-            '<circle class="gym-chart__dot' +
-            (emphasis ? " is-key" : "") +
-            '" cx="' + fmt(x(p.t)) + '" cy="' + fmt(y(p.v)) + '" r="' + (emphasis ? 4 : 2.5) + '"></circle>'
+            // panel caption doubles as the legend — identity by label, not colour
+            '<text class="gym-chart__panel" x="' + CHART.padL + '" y="' + (top - 7) + '">' +
+            esc(tr.def.panel) + "</text>" +
+            '<line class="gym-chart__grid" x1="' + CHART.padL + '" y1="' + fmt(y(maxV)) + '" x2="' +
+            (CHART.w - padR) + '" y2="' + fmt(y(maxV)) + '"></line>' +
+            '<line class="gym-chart__grid" x1="' + CHART.padL + '" y1="' + fmt(y(minV)) + '" x2="' +
+            (CHART.w - padR) + '" y2="' + fmt(y(minV)) + '"></line>' +
+            '<text class="gym-chart__tick" x="' + (CHART.padL - 8) + '" y="' + fmt(y(maxV) + 4) +
+            '" text-anchor="end">' + esc(maxV >= 1000 ? fmtBig(maxV) : fmt(maxV)) + "</text>" +
+            '<text class="gym-chart__tick" x="' + (CHART.padL - 8) + '" y="' + fmt(y(minV) + 4) +
+            '" text-anchor="end">' + esc(minV >= 1000 ? fmtBig(minV) : fmt(minV)) + "</text>" +
+            (dGap ? '<path class="gym-chart__line gym-chart__line--gap s' + tr.index + '" d="' + dGap + '"></path>' : "") +
+            '<path class="gym-chart__line s' + tr.index + '" d="' + d + '"></path>' +
+            dots +
+            '<text class="gym-chart__value s' + tr.index + '" x="' + fmt(x(s.points[lastIdx].t) + 8) +
+            '" y="' + fmt(y(vs[lastIdx]) + 4) + '">' + esc(endLabels[tr.index]) + "</text>"
           );
         })
         .join("");
 
-      // hit targets are wider than the dots so hovering is not pixel-hunting
-      var hits = pts
+      // dates once, under the bottom panel — the x scale is shared
+      var axis =
+        '<text class="gym-chart__tick" x="' + CHART.padL + '" y="' + (height - 5) + '">' +
+        esc(s.points[0].label.split("–")[0].trim()) + "</text>" +
+        '<text class="gym-chart__tick" x="' + (CHART.w - padR) + '" y="' + (height - 5) +
+        '" text-anchor="end">' + esc(s.points[lastIdx].label.split("–")[0].trim()) + "</text>";
+
+      // one hit target per session, spanning every panel, carrying all values
+      var hits = s.points
         .map(function (p, i) {
-          var half = innerW / Math.max(1, pts.length - 1) / 2;
+          var half = innerW / Math.max(1, s.points.length - 1) / 2;
           var cx = x(p.t);
+          var value = tracks
+            .map(function (tr) {
+              return (tracks.length > 1 ? tr.def.name + " " : "") + fmtValue(tr.values[i], tr.def.unit);
+            })
+            .join(" · ");
           return (
             '<rect class="gym-chart__hit" x="' + fmt(Math.max(0, cx - half)) + '" y="0" width="' +
-            fmt(Math.min(CHART.w, half * 2)) + '" height="' + CHART.h +
-            '" data-i="' + i + '" data-x="' + fmt(cx) + '" data-y="' + fmt(y(p.v)) +
-            '" data-label="' + esc(p.label) + '" data-value="' + fmt(p.v) + " " + s.unit + '"></rect>'
+            fmt(Math.min(CHART.w, half * 2)) + '" height="' + height +
+            '" data-x="' + fmt(cx) + '" data-label="' + esc(p.label) + '" data-value="' + esc(value) +
+            '" data-url="' + esc(p.u || "") + '"></rect>'
           );
         })
         .join("");
 
-      var labels =
-        '<text class="gym-chart__value" x="' + fmt(x(pts[lastIdx].t) + 8) + '" y="' + fmt(y(pts[lastIdx].v) + 4) +
-        '">' + fmt(pts[lastIdx].v) + " " + s.unit + "</text>" +
-        (bestIdx !== lastIdx
-          ? '<text class="gym-chart__value is-muted" x="' + fmt(x(pts[bestIdx].t)) + '" y="' +
-            fmt(y(pts[bestIdx].v) - 8) + '" text-anchor="middle">' + fmt(best) + "</text>"
-          : "");
-
-      var axis =
-        '<line class="gym-chart__grid" x1="' + CHART.padL + '" y1="' + fmt(y(maxV)) + '" x2="' +
-        (CHART.w - padR) + '" y2="' + fmt(y(maxV)) + '"></line>' +
-        '<line class="gym-chart__grid" x1="' + CHART.padL + '" y1="' + fmt(y(minV)) + '" x2="' +
-        (CHART.w - padR) + '" y2="' + fmt(y(minV)) + '"></line>' +
-        '<text class="gym-chart__tick" x="' + (CHART.padL - 8) + '" y="' + fmt(y(maxV) + 4) + '" text-anchor="end">' + fmt(maxV) + "</text>" +
-        '<text class="gym-chart__tick" x="' + (CHART.padL - 8) + '" y="' + fmt(y(minV) + 4) + '" text-anchor="end">' + fmt(minV) + "</text>" +
-        '<text class="gym-chart__tick" x="' + CHART.padL + '" y="' + (CHART.h - 6) + '">' + esc(pts[0].label.split("–")[0].trim()) + "</text>" +
-        '<text class="gym-chart__tick" x="' + (CHART.w - padR) + '" y="' + (CHART.h - 6) +
-        '" text-anchor="end">' + esc(pts[lastIdx].label.split("–")[0].trim()) + "</text>";
-
-      var summary =
-        "Progresja: " + fmt(pts[0].v) + " " + s.unit + " (" + pts[0].label + ") → " +
-        fmt(pts[lastIdx].v) + " " + s.unit + " (" + pts[lastIdx].label + "), rekord " + fmt(best) + " " + s.unit;
+      var summary = tracks
+        .map(function (tr) {
+          return (
+            tr.def.name + ": " + fmtValue(tr.values[0], tr.def.unit) + " (" + s.points[0].label + ") → " +
+            fmtValue(tr.values[lastIdx], tr.def.unit) + " (" + s.points[lastIdx].label + ")"
+          );
+        })
+        .join("; ");
 
       return (
         '<figure class="gym-chart">' +
-        '<figcaption class="gym-chart__cap">' +
-        (s.loaded ? "Najcięższa seria · kg" : "Suma powtórzeń") +
-        "</figcaption>" +
         '<div class="gym-chart__plot">' +
-        '<svg viewBox="0 0 ' + CHART.w + " " + CHART.h + '" role="img" aria-label="' + esc(summary) + '">' +
+        '<svg viewBox="0 0 ' + CHART.w + " " + height + '" role="img" aria-label="Progresja — ' + esc(summary) + '">' +
+        body +
         axis +
-        '<path class="gym-chart__line" d="' + d + '"></path>' +
-        dots +
-        labels +
-        '<line class="gym-chart__cursor" x1="0" y1="' + CHART.padT + '" x2="0" y2="' + (CHART.h - CHART.padB) + '" hidden></line>' +
-        '<circle class="gym-chart__focus" r="5" hidden></circle>' +
+        '<line class="gym-chart__cursor" x1="0" y1="' + CHART.padT + '" x2="0" y2="' + (height - CHART.padB) + '" hidden></line>' +
         hits +
         "</svg>" +
-        '<div class="gym-chart__tip" hidden></div>' +
+        '<div class="gym-chart__tip' + (CHART.w < 480 ? " is-below" : "") + '" hidden></div>' +
         "</div></figure>"
       );
     }
@@ -766,25 +929,34 @@
       var plot = hit.closest(".gym-chart__plot");
       var svg = hit.ownerSVGElement;
       var cursor = svg.querySelector(".gym-chart__cursor");
-      var focus = svg.querySelector(".gym-chart__focus");
       var tip = plot.querySelector(".gym-chart__tip");
-      var cx = parseFloat(hit.dataset.x), cy = parseFloat(hit.dataset.y);
+      var cx = parseFloat(hit.dataset.x);
       cursor.setAttribute("x1", cx);
       cursor.setAttribute("x2", cx);
       cursor.hidden = false;
-      focus.setAttribute("cx", cx);
-      focus.setAttribute("cy", cy);
-      focus.hidden = false;
       tip.textContent = hit.dataset.label + " · " + hit.dataset.value;
       tip.hidden = false;
-      var rect = plot.getBoundingClientRect();
-      tip.style.left = Math.round((cx / CHART.w) * rect.width) + "px";
+      // keep the tooltip inside the plot instead of hanging off either edge
+      if (!tip.classList.contains("is-below")) {
+        // keep the floating tooltip inside the plot instead of hanging off an edge
+        var rect = plot.getBoundingClientRect();
+        var half = tip.offsetWidth / 2;
+        var left = (cx / CHART.w) * rect.width;
+        tip.style.left = Math.round(Math.min(Math.max(left, half), rect.width - half)) + "px";
+      }
     });
     root.addEventListener("pointerleave", function () {
-      root.querySelectorAll(".gym-chart__cursor, .gym-chart__focus, .gym-chart__tip").forEach(function (el) {
+      root.querySelectorAll(".gym-chart__cursor, .gym-chart__tip").forEach(function (el) {
         el.hidden = true;
       });
     }, true);
+
+    // clicking a session on the chart opens its note
+    root.addEventListener("click", function (e) {
+      var hit = e.target.closest ? e.target.closest(".gym-chart__hit") : null;
+      if (!hit || !hit.dataset.url) return;
+      location.href = hit.dataset.url;
+    });
 
     // Polish plural: 1 trening / 2 treningi / 5 treningów
     function plural(n, forms) {

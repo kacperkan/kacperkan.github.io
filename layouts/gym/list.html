@@ -57,7 +57,7 @@
       {{ $month_label := "" }}
       {{ if $title_date }}
         {{ $m = printf "%s-%s" (index $title_date 3) (index $title_date 2) }}
-        {{ $month_label = printf "%s %s" (index $months (sub (int (index $title_date 2)) 1)) (index $title_date 3) }}
+        {{ $month_label = printf "%s %s" (index $months (sub (int (strings.TrimLeft "0" (index $title_date 2))) 1)) (index $title_date 3) }}
       {{ else }}
         {{ $m = .Date.Format "2006-01" }}
         {{ $month_label = .Date.Format "January 2006" }}
