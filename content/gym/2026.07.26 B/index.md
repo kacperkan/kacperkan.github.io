@@ -1,5 +1,5 @@
 ---
-title: 29.07.2026 – B
+title: 26.07.2026 – B
 date: 2026-07-29
 math: true
 tags:

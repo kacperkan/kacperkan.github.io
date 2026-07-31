@@ -1,6 +1,6 @@
 ---
 name: gym-note
-description: Create a gym note in content/gym/ from the Google Sheets workout log, or fill YouTube links into an existing note. Reads the newest "Workout on ..." spreadsheet, finds the row for the given date (default today), and generates the note with exercise shortcodes — cell_data filled in, comment and link_data left for manual fill. When given YouTube links (pasted list), distributes them into the note's empty link_data slots in order. Use when the user asks to create/import a gym note, or to fill/add video links to one.
+description: Create a gym note in content/gym/ from the Google Sheets workout log, or fill YouTube links into an existing note. Reads the newest "Workout on ..." spreadsheet, finds the newest logged row for the given day-letter, and generates the note (dated by the coach's plan date, not today) with exercise shortcodes — cell_data filled in, comment and link_data left for manual fill. When given YouTube links (pasted list), distributes them into the note's empty link_data slots in order. Use when the user asks to create/import a gym note, or to fill/add video links to one.
 ---
 
 # Gym note from Google Sheets
@@ -12,7 +12,7 @@ Generate `content/gym/YYYY.MM.DD X/index.md` from the workout spreadsheet.
 **When something is unclear, ask the user — never guess.** Applies to anything ambiguous: which tab/row, unclear date, cell that doesn't parse, link count mismatch, existing note conflict. The subagent cannot talk to the user directly, so instruct it: on ambiguity, make NO writes, return a report describing the ambiguity and the options. The main thread then asks the user (AskUserQuestion), and re-invokes the subagent with the answer included in the prompt.
 
 Arguments (all optional, any order): `[date] [day-letter] [youtube links...]`
-- `date` — actual workout date, used only for the note title and folder name; default: today. (Row selection does not use it — see step 3.)
+- `date` — the note date (Kamil's plan date), used only for the note title and folder name. (Row selection does not use it — see step 3.) If not given, resolve it from the sheet (see "Note date" in step 4); NEVER default to today. A phrase like "from today" only means "the newest logged row", not the note date.
 - `day-letter` — A/B/C (sheet tab); default: auto-detect (see step 3).
 - YouTube URLs — video links in recording order, to fill into `link_data`.
 
@@ -41,7 +41,7 @@ Each table:
 - Header row: `Data`, then exercise names. Merged cells repeat the name with a `\[merged\]` prefix — collapse consecutive duplicates into one exercise column.
 - Data rows: optional date in the `Data` column (`D.MM.YYYY` / `DD.MM.YYYY`), then cells per exercise.
 
-**The `Data` column date is the plan-week date, NOT the actual workout date** — do not trust it for matching. Select the row like this:
+**The `Data` column date is the plan-week date Kamil assigns, NOT the actual workout date** — do not trust it for row matching. (It IS, however, the date used for the note title and folder name — see step 4.) Select the row like this:
 1. A row is "logged" if its cells match the cell_data pattern `weights (reps)`, e.g. `40/45/50/55/60 (5/5/5/5/5) <10/10/7/5/4> [5x5, ...]`. Plan-only rows (just `[3x10, 17.5/22.5/27.5]`) are not logged.
 2. If a day-letter was given: take the last logged row of that tab.
 3. Otherwise: for each tab, take its last logged row and check whether that row's cell_data already appears in an existing note under `content/gym/` — the tab whose last logged row is NOT yet in any note is the target, and determines the letter. If several qualify or none do, tell the user what you found and ask.
@@ -52,9 +52,14 @@ Each table:
 
 ### 4. Write the note
 
+**Note date** (used in the path and the `title:`): the date Kamil provides for that training, NOT the actual workout date and NOT today. Resolve in this order:
+1. Explicit date in the arguments.
+2. The `Data` column date of the selected row. B and C share the date tab A has for that cycle week — so if the selected B/C row has no date, take the date from tab A's row at the same position.
+3. Can't determine it confidently from the sheet → ask the user (typically needed for A). Never fall back to today.
+
 Path: `content/gym/YYYY.MM.DD X/index.md` (e.g. `content/gym/2026.07.26 A/index.md`). If it already exists, show it and ask before overwriting.
 
-Frontmatter (title = workout date, date = today):
+Frontmatter (title = note date as above, date = today):
 
 ```markdown
 ---
