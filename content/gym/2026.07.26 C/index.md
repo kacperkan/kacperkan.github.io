@@ -37,7 +37,7 @@ tags:
 5. Ściąganie drążka podchwytem 3x15
 {{<
     exercise cell_data="45/55/65 (15/15/15) <10/3/0> [3x15, 45/55/65]"
-    comment=""
+    comment="Coś ciężko to poszło raczej będę powtarzał za tydzień ten ciężar."
     link_data="https://youtube.com/shorts/mirOka83KPY?feature=share"
 >}}
 
