@@ -5,6 +5,9 @@
 /resources/
 public
 .DS_Store
+
+# pixi
+.pixi/
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
 
@@ -150,3 +153,6 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
+# pixi environments
+.pixi/*
+!.pixi/config.toml

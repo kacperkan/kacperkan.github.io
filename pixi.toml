@@ -1,0 +1,14 @@
+[workspace]
+authors = ["Kacper Kania <kacp.kania@gmail.com>"]
+channels = ["conda-forge"]
+name = "kacperkan.github.io"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+gym-note = "python scripts/gym_note.py"
+
+[dependencies]
+python = ">=3.11"
+google-api-python-client = "*"
+google-auth-oauthlib = "*"
