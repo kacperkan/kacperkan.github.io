@@ -60,10 +60,15 @@ def die(msg):
     sys.exit(f"error: {msg}")
 
 
+def ensure_dot(text):
+    """Comments are sentences — end them with a dot if no closing punctuation."""
+    return text + "." if text and text[-1] not in ".!?…" else text
+
+
 def parse_cell(raw):
     """Split a raw sheet cell into (cell_data, comments, links)."""
     links = [l.strip() for l in LINK_RE.findall(raw) if l.strip()]
-    comments = [c.strip() for c in COMMENT_RE.findall(raw) if c.strip()]
+    comments = [ensure_dot(c.strip()) for c in COMMENT_RE.findall(raw) if c.strip()]
     rest = COMMENT_RE.sub(" ", LINK_RE.sub(" ", raw))
     rest = re.sub(r"\s+", " ", rest).strip()
     return rest, comments, links

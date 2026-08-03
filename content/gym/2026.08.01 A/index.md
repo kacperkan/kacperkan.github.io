@@ -9,7 +9,7 @@ tags:
 1. Thusters 40 47,5 52,5 57,5 62,5x5
 {{<
     exercise cell_data="40/47.5/52.5/57.5/62.5 (5/5/5/5/5) <10/10/8/6/5>"
-    comment="Dużo zapasu"
+    comment="Dużo zapasu."
     link_data="https://youtube.com/shorts/Mxl8KaCZZQc?feature=share"
 >}}
 
@@ -23,7 +23,7 @@ tags:
 3. Wyciskanie leżąc wąskim chwytem 50 57,5 65 70 75x6
 {{<
     exercise cell_data="50/57.5/65/70/75 (6/6/6/6/6) <10/10/8/6/4>"
-    comment="Sporo zapasu jeszcze, w ostatnich dwóch powtórzeniach mi na klatę jeszcze zeszło"
+    comment="Sporo zapasu jeszcze, w ostatnich dwóch powtórzeniach mi na klatę jeszcze zeszło."
     link_data="https://youtube.com/shorts/fFm_v-46TQ4?feature=share"
 >}}
 
@@ -31,7 +31,7 @@ tags:
 {{<
     exercise cell_data="20/25/30/35 (8/8/8/8) <10/8/6/3> [4x8]"
     comment=""
-    link_data=""
+    link_data="https://youtube.com/shorts/Sq1xG0D7g34?feature=share"
 >}}
 
 5. Pullover hantlem 3x12
@@ -45,5 +45,5 @@ tags:
 {{<
     exercise cell_data="50/60/70 (10/10/10) <10/6/1> [3x10]"
     comment=""
-    link_data=""
+    link_data="https://youtube.com/shorts/EoOV5Qk0v8g?feature=share"
 >}}
