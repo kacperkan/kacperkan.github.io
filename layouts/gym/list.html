@@ -78,7 +78,7 @@
       {{/* Headline lifts of the day, deduplicated, first three. */}}
       {{ $names := slice }}
       {{ range partial "gym/exercises.html" . }}
-        {{ $n := replaceRE `\s+(?:[0-9]\S*|max|maks)(?:\s+(?:[0-9]\S*|max|maks))*\s*$` "" .n }}
+        {{ $n := replaceRE `\s+(?:[0-9+]\S*|max|maks|bez)(?:\s+(?:[0-9+]\S*|max|maks|bez))*\s*$` "" .n }}
         {{ $n = strings.TrimRight " :,-" $n }}
         {{ if and (ne $n "") (not (in $names $n)) }}{{ $names = $names | append $n }}{{ end }}
       {{ end }}

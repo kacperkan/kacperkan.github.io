@@ -436,7 +436,7 @@
     });
 
     // "Przysiady low bar 70 80 90x3" -> "Przysiady low bar"
-    var SCHEME = /\s+(?:[0-9]\S*|max|maks)(?:\s+(?:[0-9]\S*|max|maks))*\s*$/i;
+    var SCHEME = /\s+(?:[0-9+]\S*|max|maks|bez)(?:\s+(?:[0-9+]\S*|max|maks|bez))*\s*$/i;
     function stripScheme(name) {
       return name.replace(SCHEME, "").replace(/^[\s:,-]+|[\s:,-]+$/g, "");
     }
