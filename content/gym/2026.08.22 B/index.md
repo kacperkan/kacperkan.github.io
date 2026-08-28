@@ -1,6 +1,6 @@
 ---
 title: 22.08.2026 – B
-date: 2026-08-26
+date: 2026-08-28
 math: true
 tags:
     - Gym
@@ -44,6 +44,6 @@ tags:
 6. Powell raise na ławce skośnej 3x10
 {{<
     exercise cell_data="5/7.5/10 (10/10/10) <10/6/2> [3x10]"
-    comment=""
+    comment="Tak później obejrzałem, że chyba ten powel raise jest do poprawy, dasz znać, czy takie wykonanie jest poprawne?"
     link_data="https://youtube.com/shorts/1nYmfXBh5rs?feature=share,https://youtube.com/shorts/kP6hkolm2ng?feature=share"
 >}}
