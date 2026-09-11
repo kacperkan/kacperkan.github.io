@@ -6,7 +6,7 @@ tags:
     - Gym
 ---
 
-1. Przysiady low bar myśleć o utrzymaniu pozycji z przodu
+1. Przysiady low bar
 {{<
     exercise cell_data="70/80/90/100/110/117.5/125/132.5 (2/2/2/2/2/2/2/1) <10/10/10/10/8/5/3/0> [myśleć o utrzymaniu pozycji z przodu, w sensie nie odchylać się do tyłu]"
     comment="Ok, ciężkie są dla mnie te siady pod względem technicznym. Tutaj już walczyłem. W ogóle jest zawsze tak, że mocno czuję pośladki i dwójki ale czwórki w ogóle. Wydaje mi się, że przydałyby się ćwiczenia, gdzie najpierw próbuję wstać, bo chyba problem polega na tym, że za szybko chcę się prostować przez dużo wysiłku idzie na pośladki i dwójki. Może siady z przerwą na dole? "
