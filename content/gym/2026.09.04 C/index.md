@@ -41,7 +41,7 @@ tags:
     link_data="https://youtu.be/n9aCRp7RUTk"
 >}}
 
-6. Prostowanie ramion na wyciągu z linkami powtórzyć poprzedni ciężar
+6. Prostowanie ramion na wyciągu 4x7
 {{<
     exercise cell_data="15/20/25/30 (7/7/7/7) <10/7/2/1> [powtórzyć poprzedni ciężar, 4x7]"
     comment="Na końcu już trochę technika leżała."
