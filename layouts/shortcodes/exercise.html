@@ -45,8 +45,7 @@
   {{ $scheme = index . 1 }}
 {{ end }}
 
-{{/* Parse link_data (comma or pipe separated) into YouTube ids and other links. */}}
-{{ $video_ids := slice }}
+{{ $videos := slice }}
 {{ $other_links := slice }}
 {{ if $link_data }}
   {{ $delimiter := cond (in $link_data "|") "|" "," }}
@@ -65,7 +64,9 @@
       {{ else if in $link "youtube.com/shorts/" }}
         {{ $video_id = index (split (index (split $link "youtube.com/shorts/") 1) "?") 0 }}
       {{ end }}
-      {{ with $video_id }}{{ $video_ids = $video_ids | append . }}{{ end }}
+      {{ with $video_id }}{{ $videos = $videos | append (dict "kind" "youtube" "id" .) }}{{ end }}
+    {{ else if and (strings.HasPrefix $link "https://filedn.com/") (strings.HasSuffix (strings.ToLower (index (split $link "?") 0)) ".mp4") }}
+      {{ $videos = $videos | append (dict "kind" "pcloud" "src" $link) }}
     {{ else if ne $link "" }}
       {{ $other_links = $other_links | append $link }}
     {{ end }}
@@ -123,17 +124,18 @@
   {{ end }}
   </div>
 
-  {{ if $video_ids }}
+  {{ if $videos }}
   <div class="exercise-videos">
-    {{ range $video_ids }}
+    {{ range $videos }}
+    {{ if eq .kind "youtube" }}
     <button
       type="button"
       class="exercise-video"
-      data-video-id="{{ . }}"
+      data-video-id="{{ .id }}"
       aria-label="Odtwórz nagranie serii"
     >
       <img
-        src="https://i.ytimg.com/vi/{{ . }}/hqdefault.jpg"
+        src="https://i.ytimg.com/vi/{{ .id }}/hqdefault.jpg"
         width="480"
         height="360"
         loading="lazy"
@@ -150,6 +152,27 @@
         </svg>
       </span>
     </button>
+    {{ else }}
+    <button
+      type="button"
+      class="exercise-video exercise-video--pcloud"
+      data-video-src="{{ .src }}"
+      aria-label="Odtwórz nagranie serii z pCloud"
+    >
+      {{ $poster_name := replaceRE `(?i)\.mp4$` ".jpg" (path.Base (index (split .src "?") 0)) }}
+      {{ with $.Page.Resources.GetMatch (printf "posters/%s" $poster_name) }}
+      <img src="{{ .RelPermalink }}" width="360" height="640" loading="lazy" decoding="async" alt="" />
+      {{ else }}
+      <span class="exercise-video__label">Nagranie pCloud</span>
+      {{ end }}
+      <span class="exercise-video__play" aria-hidden="true">
+        <svg viewBox="0 0 68 48" width="52" height="37">
+          <path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.8 0 34 0 34 0S12.2 0 7.5 1.7a8.6 8.6 0 0 0-6 6A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.2 48 34 48 34 48s21.8 0 26.5-1.7a8.6 8.6 0 0 0 6-6A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="rgba(0,0,0,0.65)" />
+          <path d="M27 34l18-10-18-10z" fill="#fff" />
+        </svg>
+      </span>
+    </button>
+    {{ end }}
     {{ end }}
   </div>
   {{ end }}

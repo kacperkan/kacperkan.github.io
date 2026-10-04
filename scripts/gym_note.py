@@ -35,6 +35,7 @@ Dependencies: pip install google-api-python-client google-auth-oauthlib
 import argparse
 import datetime
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -258,6 +259,31 @@ def build_note(note_date, letter, exercises):
     return "\n".join(lines)
 
 
+def save_posters(exercises, note_dir):
+    poster_dir = note_dir / "posters"
+    for _, _, _, links in exercises:
+        for link in re.split(r"[,|]", links):
+            link = link.strip()
+            if not link.startswith("https://filedn.com/") or not link.lower().split("?", 1)[0].endswith(".mp4"):
+                continue
+            filename = link.split("?", 1)[0].rsplit("/", 1)[-1]
+            poster = poster_dir / f"{filename[:-4]}.jpg"
+            if poster.exists():
+                continue
+            poster_dir.mkdir(exist_ok=True)
+            try:
+                subprocess.run(
+                    ["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", "5", "-i", link,
+                     "-frames:v", "1", "-vf", "scale=360:-2", "-q:v", "5", "-y", str(poster)],
+                    check=True,
+                    capture_output=True,
+                    timeout=60,
+                )
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                poster.unlink(missing_ok=True)
+                print(f"warning: could not create poster for {filename}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Create a gym note from the Google Sheets workout log.",
@@ -391,6 +417,7 @@ def main():
         die(f"{note_path} already exists — rerun with --force to overwrite")
     note_dir.mkdir(parents=True, exist_ok=True)
     note_path.write_text(build_note(note_date, letter, exercises), encoding="utf-8")
+    save_posters(exercises, note_dir)
 
     print(f"created {note_path.relative_to(ROOT)}")
     for n, (heading, _, comment, link) in enumerate(exercises, 1):
