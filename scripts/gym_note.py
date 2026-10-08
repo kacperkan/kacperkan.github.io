@@ -121,11 +121,11 @@ def polish_weights(weights):
 
 
 def load_summary(cell_data, helper):
+    if helper:
+        return normalize(helper)
     m = SCHEME_RE.search(cell_data)
     if m:
         return m.group(1)
-    if helper:
-        return normalize(helper)
     before = cell_data.split("(", 1)[0]
     weights = [w.strip() for w in before.split("/") if w.strip()]
     reps_m = re.search(r"\(([^)]*)\)", cell_data)
