@@ -38,6 +38,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets.readonly",
@@ -46,6 +47,7 @@ SCOPES = [
 CONFIG_DIR = Path.home() / ".config" / "gym-note"
 ROOT = Path(__file__).resolve().parent.parent
 GYM_DIR = ROOT / "content" / "gym"
+PCLOUD_ROOT = "https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts"
 
 LINK_RE = re.compile(r"@([^@]+)@")
 COMMENT_RE = re.compile(r"\{([^}]*)\}")
@@ -137,9 +139,9 @@ def load_summary(cell_data, helper):
     return ""
 
 
-def extract_exercises(rows, row_idx, groups):
-    """[(heading, cell_data, comment, link)] for the selected row."""
+def extract_exercises(rows, row_idx, groups, note_date, letter):
     exercises = []
+    video_root = f"{PCLOUD_ROOT}/{note_date:%d.%m.%Y}/{letter}"
     for name, cols in groups:
         raw_cells = [cell(rows[row_idx], c) for c in cols if cell(rows[row_idx], c).strip()]
         if not raw_cells:
@@ -150,7 +152,10 @@ def extract_exercises(rows, row_idx, groups):
             main = next((p for p in parsed if p[0] and not HELPER_RE.match(p[0])), parsed[0])
         helper = next((p[0] for p in parsed if p is not main and HELPER_RE.match(p[0])), None)
         comments = [c for p in parsed for c in p[1]]
-        links = [l for p in parsed for l in p[2]]
+        links = [
+            f"{video_root}/{quote(link)}.mp4" if re.fullmatch(r"[\w-]+", link) else link
+            for p in parsed for link in p[2]
+        ]
         summary = load_summary(main[0], helper)
         heading = f"{clean_name(name)} {summary}".strip()
         exercises.append((heading, main[0], " ".join(comments), ", ".join(links)))
@@ -407,7 +412,7 @@ def main():
     if note_date is None:
         die("cannot resolve the note date from the sheet — rerun with --date DD.MM.YYYY")
 
-    exercises = extract_exercises(rows, row_idx, groups)
+    exercises = extract_exercises(rows, row_idx, groups, note_date, letter)
     if not exercises:
         die("selected row has no exercise cells")
 
