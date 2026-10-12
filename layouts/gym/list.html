@@ -19,7 +19,7 @@
 
   {{/* Rendered here rather than from the section's content so the sticky search
        field can stick for the whole length of the day list. */}}
-  <div class="gym-content">{{ partial "gym/search.html" . }}</div>
+  <div class="gym-content">{{ partial "gym/search.html" (dict "history" false) }}</div>
 
   {{/* Notes are dated a day or two after the session, so months are grouped by
        the training date in the title ("27.06.2026 – A"), not by .Date. */}}
@@ -101,46 +101,6 @@
     {{ if ne $month "" }}</ul>{{ end }}
   </div>
 </div>
-
-<script>
-  (function () {
-    var chips = document.querySelectorAll(".gym-filter__chip");
-    if (!chips.length) return;
-    var days = document.querySelectorAll(".gym-day");
-    var groups = document.querySelectorAll(".gym-days__list");
-
-    function apply(letter) {
-      days.forEach(function (day) {
-        day.hidden = letter !== "" && day.dataset.letter !== letter;
-      });
-      // hide a month heading once every day under it is filtered out
-      groups.forEach(function (list) {
-        var visible = Array.prototype.some.call(list.children, function (li) {
-          return !li.hidden;
-        });
-        list.hidden = !visible;
-        var heading = list.previousElementSibling;
-        if (heading && heading.classList.contains("gym-days__month")) heading.hidden = !visible;
-      });
-      chips.forEach(function (c) {
-        var on = c.dataset.letter === letter;
-        c.classList.toggle("is-active", on);
-        c.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-      var url = location.pathname + (letter ? "?s=" + letter : "");
-      history.replaceState(null, "", url);
-    }
-
-    chips.forEach(function (c) {
-      c.addEventListener("click", function () {
-        apply(c.dataset.letter);
-      });
-    });
-
-    var initial = new URLSearchParams(location.search).get("s");
-    if (initial) apply(initial.toUpperCase());
-  })();
-</script>
 
 <style>
   .gym-filter {

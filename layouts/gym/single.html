@@ -31,10 +31,11 @@
     zapisano {{ .Date.Format "02.01.2006" }}
   </div>
 
-  <div class="prose prose-slate dark:prose-invert max-w-none">
+  <div class="prose prose-slate dark:prose-invert max-w-none" data-gym-day="{{ .RelPermalink }}">
     {{ .Content }}
   </div>
   {{ partial "gym/exercise-assets.html" . }}
+  {{ partial "gym/search.html" (dict "history" true) }}
 
   <nav class="gym-pager" aria-label="Nawigacja między treningami">
     <div class="gym-pager__side">

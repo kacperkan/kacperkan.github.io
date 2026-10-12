@@ -14,16 +14,25 @@
 {{ range (where site.RegularPages "Section" "gym").ByDate.Reverse }}
   {{ $exercises := partial "gym/exercises.html" . }}
   {{ if $exercises }}
+    {{ $date := .Date.Format "2006-01-02" }}
+    {{ with findRESubmatch `^([0-9]{2})\.([0-9]{2})\.([0-9]{4})` .Title 1 }}
+      {{ $match := index . 0 }}
+      {{ $date = printf "%s-%s-%s" (index $match 3) (index $match 2) (index $match 1) }}
+    {{ end }}
+    {{ $letter := "" }}
+    {{ with findRE `[A-Z]\s*$` .Title 1 }}{{ $letter = strings.TrimSpace (index . 0) }}{{ end }}
     {{ $days = $days | append (dict
       "t" .Title
       "u" .RelPermalink
-      "d" (.Date.Format "2006-01-02")
+      "d" $date
+      "s" $letter
       "e" $exercises) }}
   {{ end }}
 {{ end }}
 
-{{ $payload := dict "days" $days "rules" (site.Data.gym | default dict) }}
+{{ $payload := dict "days" (sort $days "d" "desc") "rules" (site.Data.gym | default dict) }}
 
+{{ if not .history }}
 <div class="gym-search" id="gym-search">
   <label class="gym-search__field">
     <svg class="gym-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -43,11 +52,12 @@
   <div class="gym-search__meta" role="status" aria-live="polite"></div>
   <div class="gym-search__results"></div>
 </div>
+{{ end }}
 
-<script type="application/json" id="gym-search-data">
-  {{ $payload | jsonify | safeJS }}
-</script>
+{{ $data := resources.FromString "js/gym-data.js" (printf "window.gymData = %s;" ($payload | jsonify)) | fingerprint }}
+<script src="{{ $data.RelPermalink }}" defer></script>
 
+{{ if not .history }}
 <style>
   /* The shortcode renders inside the theme's `max-w-prose` article, but the day
      list below it uses `max-w-3xl`. Break out of the prose column so both line up. */
@@ -409,17 +419,19 @@
     border-radius: 0.15em;
   }
 </style>
+{{ end }}
 
 <script>
-  (function () {
+  document.addEventListener("DOMContentLoaded", function () {
     var root = document.getElementById("gym-search");
-    if (!root) return;
-    var payload = JSON.parse(document.getElementById("gym-search-data").textContent);
+    var current = document.querySelector("[data-gym-day]");
+    if (!root && !current) return;
+    var payload = window.gymData;
     var days = payload.days || [];
     var rules = payload.rules || {};
-    var input = root.querySelector(".gym-search__input");
-    var meta = root.querySelector(".gym-search__meta");
-    var out = root.querySelector(".gym-search__results");
+    var input = root && root.querySelector(".gym-search__input");
+    var meta = root && root.querySelector(".gym-search__meta");
+    var out = root && root.querySelector(".gym-search__results");
 
     var PHRASES = rules.phrases || {};
     var SPELLING = rules.spelling || {};
@@ -537,8 +549,9 @@
     }
 
     // Group every exercise occurrence into its cluster.
+    function buildGroups(selectedDays) {
     var groups = new Map();
-    days.forEach(function (day) {
+    selectedDays.forEach(function (day) {
       day.e.forEach(function (ex) {
         var label = stripScheme(ex.n);
         if (!label) return;
@@ -562,7 +575,7 @@
         });
         g.days.push({
           t: day.t,
-          u: day.u,
+          u: day.u + "#" + ex.a,
           d: day.d,
           raw: ex.n,
           c: ex.c,
@@ -617,6 +630,68 @@
     all.sort(function (a, b) {
       return a.label.localeCompare(b.label, "pl");
     });
+    return all;
+    }
+
+    var all = buildGroups(days);
+    if (current) {
+      var today = days.find(function (day) { return day.u === current.dataset.gymDay; });
+      if (today) today.e.forEach(function (ex) {
+        var group = all.find(function (g) { return g.key === clusterKey(ex.n); });
+        var previous = group && group.days.find(function (day) { return day.d < today.d; });
+        var exercise = document.getElementById(ex.a);
+        if (!previous || !exercise) return;
+        var sets = parseCell(previous.c);
+        var details = document.createElement("details");
+        details.className = "exercise-previous";
+        var summary = document.createElement("summary");
+        summary.textContent = "Poprzednio · " + previous.t;
+        details.appendChild(summary);
+        var link = document.createElement("a");
+        link.href = previous.u;
+        link.textContent = "Otwórz poprzednie wykonanie";
+        details.appendChild(link);
+        var wrap = document.createElement("div");
+        wrap.className = "exercise-sets-wrap";
+        var table = document.createElement("table");
+        table.className = "exercise-sets";
+        var head = table.createTHead().insertRow();
+        var labels = ["Seria", "Ciężar", "Powt."];
+        if (sets.rir.length) labels.push("Zapas");
+        labels.forEach(function (label) {
+          var th = document.createElement("th");
+          th.scope = "col";
+          th.textContent = label;
+          head.appendChild(th);
+        });
+        var body = table.createTBody();
+        var count = Math.max(sets.weights.length, sets.reps.length, sets.rir.length);
+        for (var i = 0; i < count; i++) {
+          var row = body.insertRow();
+          var weight = sets.weights[i];
+          var values = [i + 1, weight === "0" ? "bez" : weight ? weight + " kg" : "–", sets.reps[i] || "–"];
+          if (sets.rir.length) values.push(sets.rir[i] || "–");
+          values.forEach(function (value) { row.insertCell().textContent = value; });
+        }
+        wrap.appendChild(table);
+        details.appendChild(wrap);
+        exercise.querySelector(".exercise-main").appendChild(details);
+      });
+    }
+    if (!root) return;
+
+    var chips = document.querySelectorAll(".gym-filter__chip");
+    var params = new URLSearchParams(location.search);
+    var letter = (params.get("s") || "").toUpperCase();
+    if (!days.some(function (day) { return day.s === letter; })) letter = "";
+
+    function updateUrl() {
+      var url = new URL(location.href);
+      var q = input.value.trim();
+      if (q) url.searchParams.set("q", q); else url.searchParams.delete("q");
+      if (letter) url.searchParams.set("s", letter); else url.searchParams.delete("s");
+      history.replaceState(null, "", url);
+    }
 
     // Edit distance from `token` to the *best prefix* of `word`: trailing
     // characters of the word are free, so a half-typed query still matches
@@ -1018,7 +1093,8 @@
       var q = query.replace(/[^0-9.]/g, "");
       if (!/^[0-9]{1,4}(\.[0-9]{1,4}){0,2}\.?$/.test(q) || q.replace(/\./g, "").length < 2) return [];
       return days.filter(function (day) {
-        return day.t.replace(/\s/g, "").indexOf(q) >= 0 || day.d.replace(/-/g, ".").indexOf(q) >= 0;
+        return (!letter || day.s === letter) &&
+          (day.t.replace(/\s/g, "").indexOf(q) >= 0 || day.d.replace(/-/g, ".").indexOf(q) >= 0);
       });
     }
 
@@ -1122,6 +1198,22 @@
     }
 
     function search() {
+      document.querySelectorAll(".gym-day").forEach(function (day) {
+        day.hidden = letter !== "" && day.dataset.letter !== letter;
+      });
+      document.querySelectorAll(".gym-days__list").forEach(function (list) {
+        var visible = Array.prototype.some.call(list.children, function (day) { return !day.hidden; });
+        list.hidden = !visible;
+        var heading = list.previousElementSibling;
+        if (heading && heading.classList.contains("gym-days__month")) heading.hidden = !visible;
+      });
+      chips.forEach(function (chip) {
+        var active = chip.dataset.letter === letter;
+        chip.classList.toggle("is-active", active);
+        chip.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      var selectedDays = days.filter(function (day) { return !letter || day.s === letter; });
+      all = buildGroups(selectedDays);
       var query = input.value.trim();
       if (!query) {
         render(all, [], "");
@@ -1169,11 +1261,23 @@
         input.select();
       }
     });
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        letter = chip.dataset.letter;
+        search();
+        updateUrl();
+      });
+    });
     input.addEventListener("input", function () {
       search();
-      var q = input.value.trim();
-      var url = location.pathname + (q ? "?q=" + encodeURIComponent(q) : "");
-      history.replaceState(null, "", url);
+      updateUrl();
+    });
+    window.addEventListener("popstate", function () {
+      var params = new URLSearchParams(location.search);
+      input.value = params.get("q") || "";
+      letter = (params.get("s") || "").toUpperCase();
+      if (!days.some(function (day) { return day.s === letter; })) letter = "";
+      search();
     });
     var resizeTimer = null;
     window.addEventListener("resize", function () {
@@ -1185,9 +1289,9 @@
       if (e.key === "Escape") {
         input.value = "";
         search();
-        history.replaceState(null, "", location.pathname);
+        updateUrl();
       }
     });
     search();
-  })();
+  });
 </script>

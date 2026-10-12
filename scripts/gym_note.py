@@ -53,8 +53,10 @@ LINK_RE = re.compile(r"@([^@]+)@")
 COMMENT_RE = re.compile(r"\{([^}]*)\}")
 LOGGED_RE = re.compile(r"^\d[\d.,/]*\s*\(")
 SHEET_DATE_RE = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$")
-SCHEME_RE = re.compile(r"\[\s*([^\],]+?(?:,\s*\d+(?:\.\d+)?(?:/\d+(?:\.\d+)?)+)?)\s*(?:,[^\]]*)?\]")
+ANNOTATION_RE = re.compile(r"\[([^\]]*)\]")
 HELPER_RE = re.compile(r"^[\d.,\s]+x\s*(?:\d+|max)$", re.IGNORECASE)
+WEIGHTS_RE = re.compile(r"\d+(?:\.\d+)?(?:\s*/\s*\d+(?:\.\d+)?)+")
+SETS_RE = re.compile(r"^([\d.,/]+)\s*\(([^)]*)\)\s*(?:<([^>]*)>)?")
 URL_ID_RE = re.compile(r"/spreadsheets/d/([a-zA-Z0-9_-]+)")
 URL_GID_RE = re.compile(r"[#?&]gid=(\d+)")
 
@@ -125,9 +127,14 @@ def polish_weights(weights):
 def load_summary(cell_data, helper):
     if helper:
         return normalize(helper)
-    m = SCHEME_RE.search(cell_data)
-    if m:
-        return m.group(1)
+    parts = [
+        part
+        for annotation in ANNOTATION_RE.findall(cell_data)
+        for part in annotation.split(",")
+        if HELPER_RE.fullmatch(part.strip()) or WEIGHTS_RE.fullmatch(part.strip())
+    ]
+    if parts:
+        return ",".join(parts).strip()
     before = cell_data.split("(", 1)[0]
     weights = [w.strip() for w in before.split("/") if w.strip()]
     reps_m = re.search(r"\(([^)]*)\)", cell_data)
@@ -156,6 +163,19 @@ def extract_exercises(rows, row_idx, groups, note_date, letter):
             f"{video_root}/{quote(link)}.mp4" if re.fullmatch(r"[\w-]+", link) else link
             for p in parsed for link in p[2]
         ]
+        sets = SETS_RE.match(main[0])
+        if sets:
+            counts = {
+                label: len(values.split("/"))
+                for label, values in zip(("weights", "reps", "reserve"), sets.groups())
+                if values is not None
+            }
+            if len(set(counts.values())) > 1:
+                details = ", ".join(f"{label}={count}" for label, count in counts.items())
+                print(
+                    f"warning: {clean_name(name)}: inconsistent set counts ({details})",
+                    file=sys.stderr,
+                )
         summary = load_summary(main[0], helper)
         heading = f"{clean_name(name)} {summary}".strip()
         exercises.append((heading, main[0], " ".join(comments), ", ".join(links)))
