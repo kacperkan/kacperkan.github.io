@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Create a gym note in content/gym/ from a Google Sheets workout-log link.
+"""Create a gym note in content/gym/ from a Google Sheets workout-log link,
+or queue a plan date to automatically pull and publish A/B/C notes as they become ready.
 
 Cell format in the sheet: classic cell_data, optionally followed (in any order) by
 a comment in curly brackets and a YouTube link wrapped in @ signs, e.g.
@@ -13,6 +14,10 @@ Usage (arguments in any order, all optional):
     python3 scripts/gym_note.py C 26.07.2026
     python3 scripts/gym_note.py B
     python3 scripts/gym_note.py "https://docs.google.com/spreadsheets/d/<id>/edit#gid=<gid>" [--force]
+    python3 scripts/gym_note.py --queue 10.10.2026
+    python3 scripts/gym_note.py --status
+    python3 scripts/gym_note.py --run-queue
+    python3 scripts/gym_note.py --unqueue 10.10.2026
 
 Spreadsheet: the pasted link if given, otherwise the newest "Workout ..."
 spreadsheet found via the Drive API (most recently modified = current cycle).
@@ -34,7 +39,11 @@ Dependencies: pip install google-api-python-client google-auth-oauthlib
 
 import argparse
 import datetime
+import json
+import os
+import plistlib
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -45,6 +54,12 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive.metadata.readonly",
 ]
 CONFIG_DIR = Path.home() / ".config" / "gym-note"
+QUEUE_PATH = CONFIG_DIR / "queue.json"
+LOG_PATH = CONFIG_DIR / "sync.log"
+LAUNCHD_LABEL = "io.github.kacperkan.gym-note"
+LAUNCHD_PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LAUNCHD_LABEL}.plist"
+LAUNCHD_INTERVAL_SECONDS = 1800
+LETTERS = ("A", "B", "C")
 ROOT = Path(__file__).resolve().parent.parent
 GYM_DIR = ROOT / "content" / "gym"
 PCLOUD_ROOT = "https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts"
@@ -63,6 +78,14 @@ URL_GID_RE = re.compile(r"[#?&]gid=(\d+)")
 
 def die(msg):
     sys.exit(f"error: {msg}")
+
+
+def parse_date_str(tok):
+    m = SHEET_DATE_RE.match(tok.strip())
+    if not m:
+        return None
+    d, mo, y = (int(g) for g in m.groups())
+    return datetime.date(y, mo, d)
 
 
 def ensure_dot(text):
@@ -87,12 +110,13 @@ def cell(row, idx):
     return row[idx] if idx < len(row) else ""
 
 
-def group_columns(header):
+def group_columns(header, max_cols=None):
     """[(exercise name, [column indices])] — empty header cell continues the previous
     (merged) exercise column. Column 0 is the Data column."""
+    total = max(len(header), max_cols or 0)
     groups = []
-    for idx in range(1, len(header)):
-        name = header[idx].strip()
+    for idx in range(1, total):
+        name = header[idx].strip() if idx < len(header) else ""
         if name:
             groups.append((name, [idx]))
         elif groups:
@@ -100,20 +124,60 @@ def group_columns(header):
     return groups
 
 
+def group_columns_for_rows(rows):
+    if not rows:
+        return []
+    max_cols = max(len(r) for r in rows)
+    return group_columns(rows[0], max_cols=max_cols)
+
+
+def row_logged_cells(row, groups):
+    """List of logged cell_data strings in a row."""
+    return [
+        parse_cell(cell(row, c))[0]
+        for _, cols in groups
+        for c in cols
+        if LOGGED_RE.match(parse_cell(cell(row, c))[0])
+    ]
+
+
+def row_logged_group_count(row, groups):
+    """Number of exercise groups in `row` that have at least one logged cell."""
+    count = 0
+    for _, cols in groups:
+        if any(LOGGED_RE.match(parse_cell(cell(row, c))[0]) for c in cols):
+            count += 1
+    return count
+
+
 def last_logged_row(rows, groups):
     """Index of the last row with at least one logged cell, or None."""
     found = None
     for i in range(1, len(rows)):
-        for _, cols in groups:
-            for c in cols:
-                rest, _, _ = parse_cell(cell(rows[i], c))
-                if LOGGED_RE.match(rest):
-                    found = i
-                    break
-            else:
-                continue
-            break
+        if row_logged_group_count(rows[i], groups) > 0:
+            found = i
     return found
+
+
+def find_unnoted_row(rows, groups, seen):
+    """Find the first row after already-noted rows.
+    Returns (row_idx, logged_groups, total_groups) or (None, 0, len(groups))."""
+    total = len(groups)
+    if not rows or total == 0:
+        return None, 0, total
+    last_seen_idx = 0
+    for i in range(1, len(rows)):
+        logged = row_logged_cells(rows[i], groups)
+        if logged and any(normalize(cd) in seen for cd in logged):
+            last_seen_idx = i
+    for i in range(last_seen_idx + 1, len(rows)):
+        logged_count = row_logged_group_count(rows[i], groups)
+        if logged_count > 0:
+            return i, logged_count, total
+    next_idx = last_seen_idx + 1
+    if next_idx < len(rows):
+        return next_idx, 0, total
+    return None, 0, total
 
 
 def clean_name(name):
@@ -285,7 +349,9 @@ def build_note(note_date, letter, exercises):
 
 
 def save_posters(exercises, note_dir):
+    """Extract poster frames for all filedn.com .mp4 links. Returns True if all succeeded."""
     poster_dir = note_dir / "posters"
+    all_ok = True
     for _, _, _, links in exercises:
         for link in re.split(r"[,|]", links):
             link = link.strip()
@@ -306,45 +372,99 @@ def save_posters(exercises, note_dir):
                 )
             except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 poster.unlink(missing_ok=True)
+                all_ok = False
                 print(f"warning: could not create poster for {filename}", file=sys.stderr)
+    return all_ok
 
 
-def main():
-    ap = argparse.ArgumentParser(
-        description="Create a gym note from the Google Sheets workout log.",
-        epilog="Examples: gym_note.py C 26.07.2026 | gym_note.py B | gym_note.py <sheet url>",
-    )
-    ap.add_argument(
-        "selector",
-        nargs="*",
-        help="any of, in any order: day letter A/B/C, note date DD.MM.YYYY, spreadsheet link",
-    )
-    ap.add_argument("--force", action="store_true", help="overwrite an existing note")
-    ap.add_argument(
-        "--credentials",
-        type=Path,
-        default=CONFIG_DIR / "credentials.json",
-        help="OAuth client JSON (default: %(default)s)",
-    )
-    args = ap.parse_args()
+def note_dir_for(note_date, letter):
+    return GYM_DIR / f"{note_date:%Y.%m.%d} {letter}"
 
-    letter_arg = url = override_date = None
-    for tok in args.selector:
-        if "docs.google.com" in tok or URL_ID_RE.search(tok):
-            url = tok
-        elif SHEET_DATE_RE.match(tok):
-            d, mo, y = (int(g) for g in SHEET_DATE_RE.match(tok).groups())
-            override_date = datetime.date(y, mo, d)
-        elif len(tok) == 1 and tok.isalpha():
-            letter_arg = tok.upper()
+
+def note_exists(note_date, letter):
+    return (note_dir_for(note_date, letter) / "index.md").exists()
+
+
+def load_queue():
+    if not QUEUE_PATH.exists():
+        return []
+    try:
+        data = json.loads(QUEUE_PATH.read_text(encoding="utf-8"))
+        raw_dates = data.get("dates", [])
+    except (json.JSONDecodeError, OSError):
+        return []
+    result = []
+    for tok in raw_dates:
+        d = parse_date_str(tok)
+        if d and d not in result:
+            result.append(d)
+    return result
+
+
+def save_queue(dates):
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    unique = []
+    for d in dates:
+        if d not in unique:
+            unique.append(d)
+    payload = {
+        "dates": [f"{d:%d.%m.%Y}" for d in unique],
+        "updated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+    }
+    QUEUE_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def ensure_launchd_agent():
+    """Install and load the macOS LaunchAgent to periodically run --run-queue."""
+    if sys.platform != "darwin":
+        return
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    LAUNCHD_PLIST.parent.mkdir(parents=True, exist_ok=True)
+    python_bin = Path(sys.executable).resolve()
+    env_path = f"{python_bin.parent}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    plist_data = {
+        "Label": LAUNCHD_LABEL,
+        "ProgramArguments": [str(python_bin), str(Path(__file__).resolve()), "--run-queue"],
+        "WorkingDirectory": str(ROOT),
+        "EnvironmentVariables": {
+            "PATH": env_path,
+            "HOME": str(Path.home()),
+        },
+        "StartInterval": LAUNCHD_INTERVAL_SECONDS,
+        "RunAtLoad": False,
+        "StandardOutPath": str(LOG_PATH),
+        "StandardErrorPath": str(LOG_PATH),
+    }
+    new_bytes = plistlib.dumps(plist_data)
+    changed = not LAUNCHD_PLIST.exists() or LAUNCHD_PLIST.read_bytes() != new_bytes
+    if changed:
+        LAUNCHD_PLIST.write_bytes(new_bytes)
+    uid = os.getuid()
+    domain_target = f"gui/{uid}/{LAUNCHD_LABEL}"
+    check = subprocess.run(["launchctl", "print", domain_target], capture_output=True)
+    if check.returncode != 0 or changed:
+        subprocess.run(["launchctl", "bootout", f"gui/{uid}", str(LAUNCHD_PLIST)], capture_output=True)
+        res = subprocess.run(["launchctl", "bootstrap", f"gui/{uid}", str(LAUNCHD_PLIST)], capture_output=True, text=True)
+        if res.returncode == 0:
+            print(f"launchd agent installed and active ({LAUNCHD_LABEL}, every {LAUNCHD_INTERVAL_SECONDS // 60} min)")
         else:
-            die(f"cannot interpret argument {tok!r} (expected A/B/C, DD.MM.YYYY, or a link)")
+            print(f"warning: launchctl bootstrap returned {res.returncode}: {res.stderr.strip()}", file=sys.stderr)
 
-    creds = get_credentials(args.credentials)
+
+def launchd_is_loaded():
+    if sys.platform != "darwin":
+        return False
+    res = subprocess.run(
+        ["launchctl", "print", f"gui/{os.getuid()}/{LAUNCHD_LABEL}"],
+        capture_output=True,
+    )
+    return res.returncode == 0
+
+
+def fetch_spreadsheet_tabs(creds, url=None):
     from googleapiclient.discovery import build
 
     svc = build("sheets", "v4", credentials=creds)
-
     gid = None
     if url:
         m = URL_ID_RE.search(url)
@@ -363,7 +483,6 @@ def main():
     tabs = sorted((s["properties"] for s in meta["sheets"]), key=lambda p: p["index"])
     if not tabs:
         die("spreadsheet has no tabs")
-
     values = {}
     for t in tabs:
         resp = (
@@ -373,39 +492,241 @@ def main():
             .execute()
         )
         values[t["sheetId"]] = resp.get("values", [])
+    return tabs, values, gid
 
-    def tab_letter(pos):
-        return chr(ord("A") + pos)
+
+def tab_letter(pos):
+    return chr(ord("A") + pos)
+
+
+def find_tab_pos(tabs, letter):
+    pos = next((i for i, t in enumerate(tabs) if t["title"].strip().upper() == letter), None)
+    if pos is None:
+        pos = ord(letter) - ord("A")
+    return pos if 0 <= pos < len(tabs) else None
+
+
+def git_publish(created_dirs):
+    """Commit and push newly created gym note directories."""
+    if not created_dirs:
+        return
+    rel_paths = [str(d.relative_to(ROOT)) for d in created_dirs]
+    msg = "add note" if len(rel_paths) == 1 else "add notes"
+    try:
+        subprocess.run(["git", "add", "--", *rel_paths], cwd=ROOT, check=True)
+        subprocess.run(["git", "commit", "-m", msg, "--", *rel_paths], cwd=ROOT, check=True)
+        push = subprocess.run(["git", "push"], cwd=ROOT, capture_output=True, text=True)
+        if push.returncode != 0:
+            subprocess.run(["git", "pull", "--rebase", "--autostash"], cwd=ROOT, check=True)
+            subprocess.run(["git", "push"], cwd=ROOT, check=True)
+        print(f"published to git ({msg}: {', '.join(rel_paths)})")
+    except subprocess.CalledProcessError as exc:
+        print(f"error: git publish failed: {exc}", file=sys.stderr)
+
+
+def run_queue(creds_path, push=True):
+    """Process queued dates: pull any complete A/B/C notes and publish to git."""
+    dates = load_queue()
+    if not dates:
+        return
+    pending_dates = [d for d in dates if not all(note_exists(d, l) for l in LETTERS)]
+    if len(pending_dates) != len(dates):
+        save_queue(pending_dates)
+    if not pending_dates:
+        print("all queued dates have A, B, C published — queue is now empty.")
+        return
+
+    ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{ts}] checking queued dates: {', '.join(f'{d:%d.%m.%Y}' for d in pending_dates)}")
+    creds = get_credentials(creds_path)
+    tabs, values, _ = fetch_spreadsheet_tabs(creds)
+    seen = existing_cell_data()
+    created_dirs = []
+
+    for note_date in pending_dates:
+        for letter in LETTERS:
+            if note_exists(note_date, letter):
+                print(f"  {note_date:%d.%m.%Y} {letter}: already published")
+                continue
+            pos = find_tab_pos(tabs, letter)
+            if pos is None:
+                print(f"  {note_date:%d.%m.%Y} {letter}: no matching tab in spreadsheet")
+                continue
+            rows = values[tabs[pos]["sheetId"]]
+            groups = group_columns_for_rows(rows)
+            row_idx, logged_count, total_groups = find_unnoted_row(rows, groups, seen)
+            if row_idx is None:
+                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (no un-noted row in sheet yet)")
+                continue
+            if logged_count < total_groups:
+                print(
+                    f"  {note_date:%d.%m.%Y} {letter}: waiting "
+                    f"({logged_count}/{total_groups} exercises logged in row {row_idx})"
+                )
+                continue
+            exercises = extract_exercises(rows, row_idx, groups, note_date, letter)
+            if not any(link for _, _, _, link in exercises):
+                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (no video links in row {row_idx} yet)")
+                continue
+
+            note_dir = note_dir_for(note_date, letter)
+            note_dir.mkdir(parents=True, exist_ok=True)
+            note_path = note_dir / "index.md"
+            note_path.write_text(build_note(note_date, letter, exercises), encoding="utf-8")
+            if not save_posters(exercises, note_dir):
+                shutil.rmtree(note_dir, ignore_errors=True)
+                print(
+                    f"  {note_date:%d.%m.%Y} {letter}: waiting "
+                    f"(pCloud videos not all reachable for poster extraction yet)"
+                )
+                continue
+
+            for _, cd, _, _ in exercises:
+                seen.add(normalize(cd))
+            created_dirs.append(note_dir)
+            print(f"  {note_date:%d.%m.%Y} {letter}: created {note_path.relative_to(ROOT)}")
+
+    if created_dirs and push:
+        git_publish(created_dirs)
+
+    remaining = [d for d in pending_dates if not all(note_exists(d, l) for l in LETTERS)]
+    if len(remaining) != len(pending_dates):
+        save_queue(remaining)
+
+
+def print_status():
+    dates = load_queue()
+    loaded = launchd_is_loaded()
+    print(f"launchd agent ({LAUNCHD_LABEL}): {'active' if loaded else 'not loaded'}")
+    if not dates:
+        print("queue: empty")
+    else:
+        print("queue:")
+        for d in dates:
+            parts = [f"{l}={'done' if note_exists(d, l) else 'pending'}" for l in LETTERS]
+            print(f"  {d:%d.%m.%Y}: {', '.join(parts)}")
+    if LOG_PATH.exists():
+        lines = LOG_PATH.read_text(encoding="utf-8", errors="replace").splitlines()
+        if lines:
+            print(f"recent log ({LOG_PATH}):")
+            for line in lines[-6:]:
+                print(f"  {line}")
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="Create a gym note from the Google Sheets workout log, or manage queued dates.",
+        epilog=(
+            "Examples: gym_note.py C 26.07.2026 | gym_note.py --queue 10.10.2026 | "
+            "gym_note.py --status | gym_note.py --run-queue"
+        ),
+    )
+    ap.add_argument(
+        "selector",
+        nargs="*",
+        help="any of, in any order: day letter A/B/C, note date DD.MM.YYYY, spreadsheet link",
+    )
+    ap.add_argument("--force", action="store_true", help="overwrite an existing note")
+    ap.add_argument(
+        "--queue",
+        action="store_true",
+        help="queue the given DD.MM.YYYY date(s) to auto-publish A, B, C as they become ready",
+    )
+    ap.add_argument(
+        "--unqueue",
+        action="store_true",
+        help="remove the given DD.MM.YYYY date(s) from the queue",
+    )
+    ap.add_argument(
+        "--run-queue",
+        action="store_true",
+        help="check queued dates once and publish any newly completed A/B/C notes",
+    )
+    ap.add_argument(
+        "--status",
+        action="store_true",
+        help="show queued dates, A/B/C completion status, and launchd agent status",
+    )
+    ap.add_argument(
+        "--no-push",
+        action="store_true",
+        help="when running --queue or --run-queue, do not git commit/push created notes",
+    )
+    ap.add_argument(
+        "--credentials",
+        type=Path,
+        default=CONFIG_DIR / "credentials.json",
+        help="OAuth client JSON (default: %(default)s)",
+    )
+    args = ap.parse_args()
+
+    if args.status:
+        print_status()
+        return
+
+    if args.unqueue:
+        to_remove = [parse_date_str(t) for t in args.selector]
+        if not to_remove or any(d is None for d in to_remove):
+            die("pass one or more DD.MM.YYYY dates with --unqueue")
+        current = load_queue()
+        updated = [d for d in current if d not in to_remove]
+        save_queue(updated)
+        print(f"removed {', '.join(f'{d:%d.%m.%Y}' for d in to_remove)} from queue")
+        print_status()
+        return
+
+    if args.queue:
+        to_add = [parse_date_str(t) for t in args.selector]
+        if any(d is None for d in to_add):
+            die("with --queue, arguments must be DD.MM.YYYY dates")
+        current = load_queue()
+        for d in to_add:
+            if d not in current:
+                current.append(d)
+                print(f"queued {d:%d.%m.%Y}")
+        save_queue(current)
+        ensure_launchd_agent()
+        run_queue(args.credentials, push=not args.no_push)
+        return
+
+    if args.run_queue:
+        run_queue(args.credentials, push=not args.no_push)
+        return
+
+    letter_arg = url = override_date = None
+    for tok in args.selector:
+        if "docs.google.com" in tok or URL_ID_RE.search(tok):
+            url = tok
+        elif SHEET_DATE_RE.match(tok):
+            override_date = parse_date_str(tok)
+        elif len(tok) == 1 and tok.isalpha():
+            letter_arg = tok.upper()
+        else:
+            die(f"cannot interpret argument {tok!r} (expected A/B/C, DD.MM.YYYY, or a link)")
+
+    creds = get_credentials(args.credentials)
+    tabs, values, gid = fetch_spreadsheet_tabs(creds, url)
+    seen = existing_cell_data()
 
     if letter_arg is not None:
-        pos = next(
-            (i for i, t in enumerate(tabs) if t["title"].strip().upper() == letter_arg), None
-        )
+        pos = find_tab_pos(tabs, letter_arg)
         if pos is None:
-            pos = ord(letter_arg) - ord("A")
-        if not 0 <= pos < len(tabs):
             die(f"no tab for letter {letter_arg} (spreadsheet has {len(tabs)} tabs)")
     elif gid is not None:
         pos = next((i for i, t in enumerate(tabs) if t["sheetId"] == gid), None)
         if pos is None:
             die(f"no tab with gid={gid} in this spreadsheet")
     else:
-        seen = existing_cell_data()
         candidates = []
         for i, t in enumerate(tabs):
             rows = values[t["sheetId"]]
             if not rows:
                 continue
-            groups = group_columns(rows[0])
+            groups = group_columns_for_rows(rows)
             li = last_logged_row(rows, groups)
             if li is None:
                 continue
-            row_data = [
-                parse_cell(cell(rows[li], c))[0]
-                for _, cols in groups
-                for c in cols
-                if LOGGED_RE.match(parse_cell(cell(rows[li], c))[0])
-            ]
+            row_data = row_logged_cells(rows[li], groups)
             if row_data and not any(normalize(cd) in seen for cd in row_data):
                 candidates.append((i, t))
         if len(candidates) != 1:
@@ -421,22 +742,29 @@ def main():
     rows = values[tab["sheetId"]]
     if not rows:
         die(f"tab {letter} is empty")
-    groups = group_columns(rows[0])
+    groups = group_columns_for_rows(rows)
     row_idx = last_logged_row(rows, groups)
     if row_idx is None:
         die(f"tab {letter} has no logged rows")
+    if not args.force:
+        row_data = row_logged_cells(rows[row_idx], groups)
+        if row_data and any(normalize(cd) in seen for cd in row_data):
+            die(
+                f"last logged row in tab {letter} (row {row_idx}) is already present in an "
+                f"existing note — log the new workout first or pass --force"
+            )
 
     note_date = override_date or sheet_date(rows, row_idx)
     if note_date is None and pos != 0:
         note_date = sheet_date(values[tabs[0]["sheetId"]], row_idx)
     if note_date is None:
-        die("cannot resolve the note date from the sheet — rerun with --date DD.MM.YYYY")
+        die("cannot resolve the note date from the sheet — rerun with DD.MM.YYYY")
 
     exercises = extract_exercises(rows, row_idx, groups, note_date, letter)
     if not exercises:
         die("selected row has no exercise cells")
 
-    note_dir = GYM_DIR / f"{note_date:%Y.%m.%d} {letter}"
+    note_dir = note_dir_for(note_date, letter)
     note_path = note_dir / "index.md"
     if note_path.exists() and not args.force:
         die(f"{note_path} already exists — rerun with --force to overwrite")

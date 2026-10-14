@@ -50,3 +50,46 @@ We're an open source movement that depends on your support to stay online and th
 - [Version 5.0 (February 2021)](https://hugoblox.com/blog/version-5.0-february-2021/)
 - [Version 5.0 Beta 3 (February 2021)](https://hugoblox.com/blog/version-5.0-beta-3-february-2021/)
 <!--END_SECTION:news-->
+
+## Gym Notes (`scripts/gym_note.py`)
+
+Workout notes in `content/gym/` are generated from the current Google Sheets workout log and pCloud video links (`filedn.com`).
+
+### Automatic Queue & Background Publishing
+
+Queue a training week's plan date (`DD.MM.YYYY`) to automatically pull and publish `A`, `B`, and `C` notes as you finish them during the week:
+
+```bash
+# Queue a week date (installs/activates the macOS launchd agent and checks immediately)
+pixi run gym-queue 10.10.2026
+
+# Check queue status, A/B/C progress, launchd state, and recent sync log
+pixi run gym-status
+
+# Manually run a queue check & publish pass right now
+pixi run gym-sync
+
+# Remove a date from the queue (e.g. if a workout day was skipped)
+pixi run gym-unqueue 10.10.2026
+```
+
+- **Schedule**: The macOS LaunchAgent (`~/Library/LaunchAgents/io.github.kacperkan.gym-note.plist`) runs every 30 minutes (and on wake) and logs to `~/.config/gym-note/sync.log`.
+- **Readiness criteria**: A workout tab (`A`, `B`, or `C`) is published only when:
+  1. All planned exercise columns in the next un-noted row have logged sets (`weights (reps)`).
+  2. Video links (`@1@`, `@2@`, ...) are present in the row.
+  3. All referenced `filedn.com` `.mp4` videos are reachable and `ffmpeg` extracts their poster frames cleanly.
+- **Auto-commit & cleanup**: Newly created notes under `content/gym/YYYY.MM.DD X/` are automatically committed and pushed to `main`. Once all three (`A`, `B`, `C`) exist for a date, it is automatically removed from `~/.config/gym-note/queue.json`.
+
+### Manual / Single-Note Generation
+
+```bash
+# Auto-detect the tab with an un-noted logged row
+pixi run gym-note
+
+# Specify day letter and/or plan date explicitly
+pixi run gym-note C 10.10.2026
+
+# Overwrite an existing note
+pixi run gym-note B 10.10.2026 --force
+```
+

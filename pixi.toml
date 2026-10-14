@@ -7,6 +7,10 @@ version = "0.1.0"
 
 [tasks]
 gym-note = "python scripts/gym_note.py"
+gym-queue = "python scripts/gym_note.py --queue"
+gym-unqueue = "python scripts/gym_note.py --unqueue"
+gym-status = "python scripts/gym_note.py --status"
+gym-sync = "python scripts/gym_note.py --run-queue"
 test-gym-note = "python -m unittest discover -s tests -p test_gym_note.py"
 
 [dependencies]
