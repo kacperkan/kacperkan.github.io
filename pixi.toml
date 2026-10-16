@@ -6,12 +6,12 @@ platforms = ["osx-arm64"]
 version = "0.1.0"
 
 [tasks]
-gym-note = "python scripts/gym_note.py"
-gym-queue = "python scripts/gym_note.py --queue"
-gym-unqueue = "python scripts/gym_note.py --unqueue"
-gym-status = "python scripts/gym_note.py --status"
-gym-sync = "python scripts/gym_note.py --run-queue"
-test-gym-note = "python -m unittest discover -s tests -p test_gym_note.py"
+gym-note = { cmd = "python scripts/gym_note.py", description = "Import a workout note manually" }
+gym-queue = { cmd = "python scripts/gym_note.py --queue", description = "Queue plan dates (DD.MM.YYYY), enable launchd, and publish ready notes immediately" }
+gym-unqueue = { cmd = "python scripts/gym_note.py --unqueue", description = "Remove plan dates (DD.MM.YYYY) from the queue" }
+gym-status = { cmd = "python scripts/gym_note.py --status", description = "Show queue, workout progress, launchd status, and recent logs" }
+gym-sync = { cmd = "python scripts/gym_note.py --run-queue", description = "Check the queue now; commit and push ready notes" }
+test-gym-note = { cmd = "python -m unittest discover -s tests -p test_gym_note.py", description = "Run workout note import tests" }
 
 [dependencies]
 python = ">=3.11"
