@@ -38,12 +38,12 @@ tags:
 {{<
     exercise cell_data="22.5/27.5/32.5/37.5 (8/8/8/8) <10/8/5/3> [4x8]"
     comment=""
-    link_data=""
+    link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/10.10.2026/C/5.mp4"
 >}}
 
 6. Rumuński martwy ciąg 55 65 75 85 95x6
 {{<
     exercise cell_data="55/65/75/85/95 (6/6/6/6/6) <10/10/8/6/4>"
     comment="Zapomniałem pasków, ale spoko poszło."
-    link_data=""
+    link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/10.10.2026/C/6.mp4"
 >}}

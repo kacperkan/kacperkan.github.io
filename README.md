@@ -74,13 +74,16 @@ pixi run gym-unqueue 10.10.2026
 ```
 
 - **Schedule**: The macOS LaunchAgent (`~/Library/LaunchAgents/io.github.kacperkan.gym-note.plist`) runs every 30 minutes (and on wake) and logs to `~/.config/gym-note/sync.log`.
-- **Readiness criteria**: A workout tab (`A`, `B`, or `C`) is published only when:
-  1. All planned exercise columns in the next un-noted row have logged sets (`weights (reps)`).
-  2. Video links (`@1@`, `@2@`, ...) are present in the row.
-  3. All referenced `filedn.com` `.mp4` videos are reachable and `ffmpeg` extracts their poster frames cleanly.
+- **Setup**: Add a column named `Gotowe` at the end of each workout tab (`A`, `B`, `C`). Select the cells below the header and choose **Insert → Checkbox** in Google Sheets. Keep the default checkbox values (`TRUE` / `FALSE`). Check a row only after entering all results and intended video links.
+- **Readiness criteria**: A workout tab is published only when:
+  1. The next un-noted row has its `Gotowe` checkbox checked. A missing column, blank cell, or unchecked checkbox blocks automatic publication.
+  2. All planned exercise columns in that row have logged sets (`weights (reps)`). The `Gotowe` column is excluded from exercises.
+  3. All referenced `filedn.com` `.mp4` videos are reachable and `ffmpeg` extracts their poster frames cleanly. Missing videos are retried on the next queue check. Exercises without video links are allowed; checking `Gotowe` confirms that the report is complete.
 - **Auto-commit & cleanup**: Newly created notes under `content/gym/YYYY.MM.DD X/` are automatically committed and pushed to `main`. Once all three (`A`, `B`, `C`) exist for a date, it is automatically removed from `~/.config/gym-note/queue.json`.
 
 ### Manual / Single-Note Generation
+
+Manual imports do not require a `Gotowe` column or a checked checkbox. Already published notes are not refreshed by the queue; update them manually after adding late video links.
 
 ```bash
 # Auto-detect the tab with an un-noted logged row

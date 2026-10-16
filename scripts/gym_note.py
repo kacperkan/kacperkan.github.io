@@ -117,9 +117,11 @@ def group_columns(header, max_cols=None):
     groups = []
     for idx in range(1, total):
         name = header[idx].strip() if idx < len(header) else ""
+        if name.casefold() == "gotowe":
+            continue
         if name:
             groups.append((name, [idx]))
-        elif groups:
+        elif groups and groups[-1][1][-1] == idx - 1:
             groups[-1][1].append(idx)
     return groups
 
@@ -553,10 +555,20 @@ def run_queue(creds_path, push=True):
                 print(f"  {note_date:%d.%m.%Y} {letter}: no matching tab in spreadsheet")
                 continue
             rows = values[tabs[pos]["sheetId"]]
+            ready_idx = next(
+                (i for i, name in enumerate(rows[0]) if name.strip().casefold() == "gotowe"),
+                None,
+            ) if rows else None
+            if ready_idx is None:
+                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (missing Gotowe checkbox column)")
+                continue
             groups = group_columns_for_rows(rows)
             row_idx, logged_count, total_groups = find_unnoted_row(rows, groups, seen)
             if row_idx is None:
                 print(f"  {note_date:%d.%m.%Y} {letter}: waiting (no un-noted row in sheet yet)")
+                continue
+            if str(cell(rows[row_idx], ready_idx)).strip().upper() != "TRUE":
+                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (Gotowe is not checked in row {row_idx})")
                 continue
             if logged_count < total_groups:
                 print(
@@ -565,10 +577,6 @@ def run_queue(creds_path, push=True):
                 )
                 continue
             exercises = extract_exercises(rows, row_idx, groups, note_date, letter)
-            if not any(link for _, _, _, link in exercises):
-                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (no video links in row {row_idx} yet)")
-                continue
-
             note_dir = note_dir_for(note_date, letter)
             note_dir.mkdir(parents=True, exist_ok=True)
             note_path = note_dir / "index.md"

@@ -107,8 +107,8 @@ class GymNoteTests(unittest.TestCase):
                     {"sheetId": 3, "title": "C", "index": 2},
                 ]
                 c_rows = [
-                    ["Data", "Squat", "Bench"],
-                    ["09.10.2026", "100/110 (5/5) @1@", "80/90 (5/5) @2@"],
+                    ["Data", "Squat", "Bench", "Gotowe"],
+                    ["09.10.2026", "100/110 (5/5) @1@", "80/90 (5/5) @2@", "TRUE"],
                 ]
                 values = {1: [], 2: [], 3: c_rows}
 
