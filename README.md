@@ -74,7 +74,7 @@ pixi run gym-unqueue 10.10.2026
 ```
 
 - **Schedule**: The macOS LaunchAgent (`~/Library/LaunchAgents/io.github.kacperkan.gym-note.plist`) runs every 30 minutes (and on wake) and logs to `~/.config/gym-note/sync.log`.
-- **Setup**: Add a column named `Gotowe` at the end of each workout tab (`A`, `B`, `C`). Select the cells below the header and choose **Insert → Checkbox** in Google Sheets. Keep the default checkbox values (`TRUE` / `FALSE`). Check a row only after entering all results and intended video links.
+- **Setup**: Add a column named `Gotowe` (or `Gotowe?`) at the end of each workout tab (`A`, `B`, `C`). Select the cells below the header and choose **Insert → Checkbox** in Google Sheets. Keep the default checkbox values (`TRUE` / `FALSE`). Check a row only after entering all results and intended video links.
 - **Readiness criteria**: A workout tab is published only when:
   1. The next un-noted row has its `Gotowe` checkbox checked. A missing column, blank cell, or unchecked checkbox blocks automatic publication.
   2. All planned exercise columns in that row have logged sets (`weights (reps)`). The `Gotowe` column is excluded from exercises.

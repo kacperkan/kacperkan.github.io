@@ -117,7 +117,7 @@ def group_columns(header, max_cols=None):
     groups = []
     for idx in range(1, total):
         name = header[idx].strip() if idx < len(header) else ""
-        if name.casefold() == "gotowe":
+        if name.removesuffix("?").strip().casefold() == "gotowe":
             continue
         if name:
             groups.append((name, [idx]))
@@ -556,7 +556,7 @@ def run_queue(creds_path, push=True):
                 continue
             rows = values[tabs[pos]["sheetId"]]
             ready_idx = next(
-                (i for i, name in enumerate(rows[0]) if name.strip().casefold() == "gotowe"),
+                (i for i, name in enumerate(rows[0]) if name.strip().removesuffix("?").strip().casefold() == "gotowe"),
                 None,
             ) if rows else None
             if ready_idx is None:
