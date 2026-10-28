@@ -38,7 +38,7 @@ tags:
 {{<
     exercise cell_data="7.5/10/12.5 (12/12/12) <10/6/2> [3x12]"
     comment=""
-    link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/17.10.2026/B/6.mp4"
+    link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/17.10.2026/B/5.mp4"
 >}}
 
 6. Uginanie ramion z hantlami na ławce skośnej (na plecach) 3x12
