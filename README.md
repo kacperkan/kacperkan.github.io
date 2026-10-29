@@ -83,10 +83,10 @@ pixi run gym-unqueue 10.10.2026
 
 ### Manual / Single-Note Generation
 
-Manual imports do not require a `Gotowe` column or a checked checkbox. Already published notes are not refreshed by the queue; update them manually after adding late video links.
+Manual imports do not require a `Gotowe` column or a checked checkbox. They select the first unimported workout, just like the queue; an earlier row without results blocks later rows. Automatic tab selection requires exactly one unambiguous candidate. Already imported notes are not refreshed by the queue. To refresh one manually, provide its letter, plan date and `--force`; this overwrites only the same source, not a different workout.
 
 ```bash
-# Auto-detect the tab with an un-noted logged row
+# Auto-detect the only tab with an unimported workout
 pixi run gym-note
 
 # Specify day letter and/or plan date explicitly
@@ -95,4 +95,16 @@ pixi run gym-note C 10.10.2026
 # Overwrite an existing note
 pixi run gym-note B 10.10.2026 --force
 ```
+
+### Source identity and migration
+
+- Source identity is `(spreadsheet_id, sheet_id, workout_date)`, stored as a one-line JSON object in YAML frontmatter under `gym_source`. `workout_date` uses `YYYY-MM-DD` from the tab's `Data` cell. Row numbers and exercise results are not identifiers; repeated results are valid.
+- The explicit plan date controls the existing directory/title and video paths, independently of the workout date. Without a plan-date argument, manual import uses the selected workout date; it never borrows another tab's row date.
+- Queue dates are processed chronologically. Each tab selects its first unimported row in sheet order. Blank spacer rows are ignored; rows containing a date or exercise content require a valid, unique workout date. Missing/invalid/duplicate dates, disappeared imported dates, conflicting metadata and unresolved history block that tab with an explanation.
+- `gym-status` shows local queue/launchd state plus the timestamp and results of the last synchronization in `~/.config/gym-note/last-sync.json`, explicitly a snapshot, not live Sheets data. Diagnostics use one-based Google Sheets row numbers and workout dates.
+- Notes are staged separately; failed poster extraction leaves no completed note and preserves an existing note during `--force`. Imports use an exclusive process lock. Queue publication still uses the existing Git publishing workflow; use `--no-push` for local-only imports.
+
+Historical migration requires explicit review and approval. First list the actual workbook/tab IDs and dated rows, then propose a mapping from each existing plan-date/letter directory to exactly one source. Exercise contents can support a proposal but never establish identity automatically. Copies of workbooks, repeated results and edited dates require manual resolution. Preserve exercise text, headings, comments, links and posters; insert only approved frontmatter metadata. Do not infer letters from tab positions: supported tab titles are `A`/`B`/`C` or `Day A`/`Day B`/`Day C`.
+
+For the current cycle, 13 approved mappings were added to existing notes from plan dates `2026.09.26` through `2026.10.24`; older history remains unmigrated. Legacy notes preceding the earliest approved plan date for a tab remain historical. Legacy notes at or after that boundary block import. A workbook/tab without an approved mapping cannot silently replace a previously used source: review/migrate the relevant history before importing from it. New cycles therefore need an explicit source-mapping review, not an automatic reset. If an imported workout date changes or disappears, reconcile its existing metadata against the actual sheet before retrying; `--force` does not bypass this check.
 

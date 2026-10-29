@@ -160,3 +160,4 @@ dist
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+SPEC.md

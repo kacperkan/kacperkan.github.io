@@ -21,12 +21,7 @@ Usage (arguments in any order, all optional):
 
 Spreadsheet: the pasted link if given, otherwise the newest "Workout ..."
 spreadsheet found via the Drive API (most recently modified = current cycle).
-Tab selection: the day letter (A/B/C) if given, else the #gid= fragment of the
-link, else the tab whose last logged row is not yet present in any existing
-note is picked automatically.
-Row selection: the last logged row of the tab.
-Note date: the DD.MM.YYYY argument, else the Data column of the selected row,
-else tab A's date at the same row position (B/C share A's plan-week date).
+Source identity and migration rules are documented in README.md.
 
 Auth: OAuth (spreadsheets.readonly). Put the OAuth client file at
 ~/.config/gym-note/credentials.json (Google Cloud console -> APIs & Services ->
@@ -39,6 +34,7 @@ Dependencies: pip install google-api-python-client google-auth-oauthlib
 
 import argparse
 import datetime
+import fcntl
 import json
 import os
 import plistlib
@@ -46,6 +42,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from urllib.parse import quote
 
@@ -56,6 +53,7 @@ SCOPES = [
 CONFIG_DIR = Path.home() / ".config" / "gym-note"
 QUEUE_PATH = CONFIG_DIR / "queue.json"
 LOG_PATH = CONFIG_DIR / "sync.log"
+SYNC_PATH = CONFIG_DIR / "last-sync.json"
 LAUNCHD_LABEL = "io.github.kacperkan.gym-note"
 LAUNCHD_PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LAUNCHD_LABEL}.plist"
 LAUNCHD_INTERVAL_SECONDS = 1800
@@ -152,36 +150,6 @@ def row_logged_group_count(row, groups):
     return count
 
 
-def last_logged_row(rows, groups):
-    """Index of the last row with at least one logged cell, or None."""
-    found = None
-    for i in range(1, len(rows)):
-        if row_logged_group_count(rows[i], groups) > 0:
-            found = i
-    return found
-
-
-def find_unnoted_row(rows, groups, seen):
-    """Find the first row after already-noted rows.
-    Returns (row_idx, logged_groups, total_groups) or (None, 0, len(groups))."""
-    total = len(groups)
-    if not rows or total == 0:
-        return None, 0, total
-    last_seen_idx = 0
-    for i in range(1, len(rows)):
-        logged = row_logged_cells(rows[i], groups)
-        if logged and any(normalize(cd) in seen for cd in logged):
-            last_seen_idx = i
-    for i in range(last_seen_idx + 1, len(rows)):
-        logged_count = row_logged_group_count(rows[i], groups)
-        if logged_count > 0:
-            return i, logged_count, total
-    next_idx = last_seen_idx + 1
-    if next_idx < len(rows):
-        return next_idx, 0, total
-    return None, 0, total
-
-
 def clean_name(name):
     return normalize(re.sub(r"\s*\[[^\]]*\]", " ", name))
 
@@ -256,12 +224,117 @@ def sheet_date(rows, row_idx):
     return None
 
 
-def existing_cell_data():
-    seen = set()
-    for p in GYM_DIR.glob("*/index.md"):
-        for cd in re.findall(r'cell_data="([^"]*)"', p.read_text(encoding="utf-8")):
-            seen.add(normalize(cd))
-    return seen
+def source_key(source):
+    if not isinstance(source, dict) or set(source) != {"spreadsheet_id", "sheet_id", "workout_date"}:
+        raise ValueError("invalid gym_source metadata")
+    if not isinstance(source["spreadsheet_id"], str) or not source["spreadsheet_id"] or type(source["sheet_id"]) is not int:
+        raise ValueError("invalid spreadsheet/tab ID")
+    if datetime.date.fromisoformat(source["workout_date"]).isoformat() != source["workout_date"]:
+        raise ValueError("workout_date must use YYYY-MM-DD")
+    return source["spreadsheet_id"], source["sheet_id"], source["workout_date"]
+
+
+def note_sources():
+    sources = {}
+    legacy = []
+    for path in sorted(GYM_DIR.glob("*/index.md")):
+        text = path.read_text(encoding="utf-8")
+        front = text.split("---", 2)[1] if text.startswith("---\n") else ""
+        fields = re.findall(r"^gym_source: (.+)$", front, re.M)
+        if not fields:
+            if re.search(r"^gym_source\s*:", front, re.M):
+                raise ValueError(f"{path}: gym_source must be a JSON object on one line")
+            legacy.append(path)
+            continue
+        match = re.fullmatch(r"(\d{4}\.\d{2}\.\d{2}) ([ABC])", path.parent.name)
+        if match is None:
+            raise ValueError(f"{path}: invalid plan-date/letter directory")
+        plan_date = datetime.datetime.strptime(match[1], "%Y.%m.%d").date()
+        expected_title = f"title: {plan_date:%d.%m.%Y} – {match[2]}"
+        if expected_title not in front.splitlines():
+            raise ValueError(f"{path}: plan-date/letter conflicts with title")
+        if len(fields) != 1:
+            raise ValueError(f"{path}: duplicate gym_source metadata")
+        try:
+            key = source_key(json.loads(fields[0]))
+        except (ValueError, TypeError) as exc:
+            raise ValueError(f"{path}: invalid gym_source: {exc}") from exc
+        if key in sources:
+            raise ValueError(f"source assigned twice: {sources[key]} and {path}")
+        sources[key] = path
+    return sources, legacy
+
+
+def source_for(tab, date):
+    return {"spreadsheet_id": tab["spreadsheet_id"], "sheet_id": tab["sheetId"], "workout_date": date.isoformat()}
+
+
+def select_source(tab, rows, sources, legacy, letter, target=None):
+    groups = group_columns_for_rows(rows)
+    candidates = []
+    dates = set()
+    for i, row in enumerate(rows[1:], 1):
+        ready = any(str(cell(row, c)).strip().upper() == "TRUE" for c, name in enumerate(rows[0]) if name.strip().removesuffix("?").strip().casefold() == "gotowe")
+        if not ready and not any(str(value).strip() for value in row[:1]) and not any(cell(row, c).strip() for _, cols in groups for c in cols):
+            continue
+        try:
+            date = sheet_date(rows, i)
+        except ValueError:
+            date = None
+        if date is None:
+            raise ValueError(f"{letter}: Google Sheets row {i + 1}, date {cell(row, 0)!r}: missing/invalid workout date")
+        if date in dates:
+            raise ValueError(f"{letter}: Google Sheets row {i + 1}, date {date}: duplicate workout date")
+        dates.add(date)
+        candidates.append((i, source_for(tab, date)))
+    bound = {key: path for key, path in sources.items() if key[:2] == (tab["spreadsheet_id"], tab["sheetId"])}
+    missing = [key[2] for key in bound if datetime.date.fromisoformat(key[2]) not in dates]
+    if missing:
+        raise ValueError(f"{letter}: imported dates disappeared/changed: {', '.join(missing)}; resolve source mapping explicitly")
+    if any(not path.parent.name.endswith(f" {letter}") for path in bound.values()):
+        raise ValueError(f"{letter}: source tab assigned to a different note letter")
+    if not bound and any(path.parent.name.endswith(f" {letter}") for path in sources.values()):
+        raise ValueError(f"{letter}: workbook/tab changed; approve source mapping before import")
+    related_legacy = [p for p in legacy if p.parent.name.endswith(f" {letter}")]
+    if related_legacy:
+        if not bound:
+            raise ValueError(f"{letter}: unmapped history/new workbook; approve source mapping before import ({related_legacy[-1]})")
+        first_plan = min(path.parent.name[:10] for path in bound.values())
+        unresolved = [p for p in related_legacy if p.parent.name[:10] >= first_plan]
+        if unresolved:
+            raise ValueError(f"{letter}: unresolved historical mapping: {unresolved[0]}")
+    if target is not None:
+        assigned = next((key for key, path in bound.items() if path == target), None)
+        if assigned is not None:
+            return next((i, groups, source) for i, source in candidates if source_key(source) == assigned)
+    for i, source in candidates:
+        key = source_key(source)
+        if key not in sources or sources[key] == target:
+            return i, groups, source
+    return None, groups, None
+
+
+def write_note(note_date, letter, exercises, source, force=False):
+    destination = note_dir_for(note_date, letter)
+    if (destination / "index.md").exists() and not force:
+        raise ValueError(f"{destination}: already exists; use --force for an explicit overwrite")
+    GYM_DIR.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".gym-note-", dir=GYM_DIR) as tmp:
+        staging = Path(tmp)
+        if not save_posters(exercises, staging):
+            raise ValueError("waiting: pCloud videos not all reachable for poster extraction")
+        text = build_note(note_date, letter, exercises)
+        text = text.replace("math: true\n", "math: true\ngym_source: " + json.dumps(source) + "\n", 1)
+        (staging / "index.md").write_text(text, encoding="utf-8")
+        if destination.exists():
+            if not force:
+                raise ValueError(f"{destination}: directory already exists; refusing overwrite")
+            if (staging / "posters").exists():
+                shutil.copytree(staging / "posters", destination / "posters", dirs_exist_ok=True)
+            os.replace(staging / "index.md", destination / "index.md")
+        else:
+            os.rename(staging, destination)
+    return destination
 
 
 def get_credentials(creds_path):
@@ -494,6 +567,8 @@ def fetch_spreadsheet_tabs(creds, url=None):
             .execute()
         )
         values[t["sheetId"]] = resp.get("values", [])
+    for tab in tabs:
+        tab["spreadsheet_id"] = spreadsheet_id
     return tabs, values, gid
 
 
@@ -502,10 +577,8 @@ def tab_letter(pos):
 
 
 def find_tab_pos(tabs, letter):
-    pos = next((i for i, t in enumerate(tabs) if t["title"].strip().upper() == letter), None)
-    if pos is None:
-        pos = ord(letter) - ord("A")
-    return pos if 0 <= pos < len(tabs) else None
+    matches = [i for i, t in enumerate(tabs) if t["title"].strip().upper() in (letter, f"DAY {letter}")]
+    return matches[0] if len(matches) == 1 else None
 
 
 def git_publish(created_dirs):
@@ -527,11 +600,29 @@ def git_publish(created_dirs):
 
 
 def run_queue(creds_path, push=True):
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    started = datetime.datetime.now().isoformat(timespec="seconds")
+    SYNC_PATH.write_text(json.dumps({"started_at": started, "finished_at": None, "results": ["sync started"]}) + "\n")
+    try:
+        sync_queue(creds_path, push)
+    except (Exception, SystemExit) as exc:
+        SYNC_PATH.write_text(json.dumps({"results": [f"sync failed: {exc}"]}) + "\n")
+        raise
+    finally:
+        snapshot = json.loads(SYNC_PATH.read_text())
+        snapshot["started_at"] = started
+        snapshot["finished_at"] = datetime.datetime.now().isoformat(timespec="seconds")
+        if snapshot["results"] == ["sync started"]:
+            snapshot["results"] = ["no pending dates"]
+        SYNC_PATH.write_text(json.dumps(snapshot, indent=2) + "\n")
+
+
+def sync_queue(creds_path, push=True):
     """Process queued dates: pull any complete A/B/C notes and publish to git."""
     dates = load_queue()
     if not dates:
         return
-    pending_dates = [d for d in dates if not all(note_exists(d, l) for l in LETTERS)]
+    pending_dates = sorted(d for d in dates if not all(note_exists(d, l) for l in LETTERS))
     if len(pending_dates) != len(dates):
         save_queue(pending_dates)
     if not pending_dates:
@@ -542,8 +633,15 @@ def run_queue(creds_path, push=True):
     print(f"[{ts}] checking queued dates: {', '.join(f'{d:%d.%m.%Y}' for d in pending_dates)}")
     creds = get_credentials(creds_path)
     tabs, values, _ = fetch_spreadsheet_tabs(creds)
-    seen = existing_cell_data()
     created_dirs = []
+    messages = []
+    try:
+        sources, legacy = note_sources()
+    except ValueError as exc:
+        print(f"blocked: {exc}")
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        SYNC_PATH.write_text(json.dumps({"finished_at": datetime.datetime.now().isoformat(), "results": [str(exc)]}) + "\n")
+        return
 
     for note_date in pending_dates:
         for letter in LETTERS:
@@ -552,48 +650,54 @@ def run_queue(creds_path, push=True):
                 continue
             pos = find_tab_pos(tabs, letter)
             if pos is None:
-                print(f"  {note_date:%d.%m.%Y} {letter}: no matching tab in spreadsheet")
+                messages.append(f"{note_date:%d.%m.%Y} {letter}: blocked (no unique matching tab in spreadsheet)")
+                print(messages[-1])
                 continue
             rows = values[tabs[pos]["sheetId"]]
             ready_idx = next(
                 (i for i, name in enumerate(rows[0]) if name.strip().removesuffix("?").strip().casefold() == "gotowe"),
                 None,
             ) if rows else None
-            if ready_idx is None:
-                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (missing Gotowe checkbox column)")
+            try:
+                row_idx, groups, source = select_source(tabs[pos], rows, sources, legacy, letter)
+            except ValueError as exc:
+                messages.append(f"{note_date:%d.%m.%Y} {letter}: blocked: {exc}")
+                print(messages[-1])
                 continue
-            groups = group_columns_for_rows(rows)
-            row_idx, logged_count, total_groups = find_unnoted_row(rows, groups, seen)
+            logged_count = row_logged_group_count(rows[row_idx], groups) if row_idx is not None else 0
+            total_groups = len(groups)
+            detail = f"Google Sheets row {row_idx + 1}, date {source['workout_date']}" if source else "no unimported workout"
+            messages.append(f"{note_date:%d.%m.%Y} {letter}: {detail}")
             if row_idx is None:
-                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (no un-noted row in sheet yet)")
+                messages[-1] += ": waiting (no unimported workout)"
+                print(messages[-1])
+                continue
+            if ready_idx is None:
+                messages[-1] += ": waiting (missing Gotowe checkbox column)"
+                print(messages[-1])
                 continue
             if str(cell(rows[row_idx], ready_idx)).strip().upper() != "TRUE":
-                print(f"  {note_date:%d.%m.%Y} {letter}: waiting (Gotowe is not checked in row {row_idx})")
+                messages[-1] += ": waiting (Gotowe is not checked)"
+                print(messages[-1])
                 continue
             if logged_count < total_groups:
-                print(
-                    f"  {note_date:%d.%m.%Y} {letter}: waiting "
-                    f"({logged_count}/{total_groups} exercises logged in row {row_idx})"
-                )
+                messages[-1] += f": waiting ({logged_count}/{total_groups} exercise groups logged)"
+                print(messages[-1])
                 continue
             exercises = extract_exercises(rows, row_idx, groups, note_date, letter)
-            note_dir = note_dir_for(note_date, letter)
-            note_dir.mkdir(parents=True, exist_ok=True)
-            note_path = note_dir / "index.md"
-            note_path.write_text(build_note(note_date, letter, exercises), encoding="utf-8")
-            if not save_posters(exercises, note_dir):
-                shutil.rmtree(note_dir, ignore_errors=True)
-                print(
-                    f"  {note_date:%d.%m.%Y} {letter}: waiting "
-                    f"(pCloud videos not all reachable for poster extraction yet)"
-                )
+            try:
+                note_dir = write_note(note_date, letter, exercises, source)
+            except ValueError as exc:
+                messages[-1] += f": {exc}"
+                print(messages[-1])
                 continue
-
-            for _, cd, _, _ in exercises:
-                seen.add(normalize(cd))
+            sources[source_key(source)] = note_dir / "index.md"
             created_dirs.append(note_dir)
-            print(f"  {note_date:%d.%m.%Y} {letter}: created {note_path.relative_to(ROOT)}")
+            messages[-1] += f": created {note_dir.relative_to(ROOT)}"
+            print(messages[-1])
 
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    SYNC_PATH.write_text(json.dumps({"finished_at": datetime.datetime.now().isoformat(), "results": messages}, indent=2) + "\n", encoding="utf-8")
     if created_dirs and push:
         git_publish(created_dirs)
 
@@ -613,10 +717,20 @@ def print_status():
         for d in dates:
             parts = [f"{l}={'done' if note_exists(d, l) else 'pending'}" for l in LETTERS]
             print(f"  {d:%d.%m.%Y}: {', '.join(parts)}")
+    if SYNC_PATH.exists():
+        try:
+            snapshot = json.loads(SYNC_PATH.read_text(encoding="utf-8"))
+            print(f"last sync snapshot (not live): {snapshot['finished_at']}")
+            for result in snapshot["results"]:
+                print(f"  {result}")
+        except (ValueError, KeyError, TypeError):
+            print("last sync snapshot: unreadable")
+    else:
+        print("last sync snapshot: unavailable (no sync recorded by this version)")
     if LOG_PATH.exists():
         lines = LOG_PATH.read_text(encoding="utf-8", errors="replace").splitlines()
         if lines:
-            print(f"recent log ({LOG_PATH}):")
+            print(f"historical log (not live; {LOG_PATH}):")
             for line in lines[-6:]:
                 print(f"  {line}")
 
@@ -714,7 +828,10 @@ def main():
 
     creds = get_credentials(args.credentials)
     tabs, values, gid = fetch_spreadsheet_tabs(creds, url)
-    seen = existing_cell_data()
+    try:
+        sources, legacy = note_sources()
+    except ValueError as exc:
+        die(str(exc))
 
     if letter_arg is not None:
         pos = find_tab_pos(tabs, letter_arg)
@@ -730,12 +847,14 @@ def main():
             rows = values[t["sheetId"]]
             if not rows:
                 continue
-            groups = group_columns_for_rows(rows)
-            li = last_logged_row(rows, groups)
-            if li is None:
+            letter = t["title"].strip().upper().removeprefix("DAY ")
+            if letter not in LETTERS:
                 continue
-            row_data = row_logged_cells(rows[li], groups)
-            if row_data and not any(normalize(cd) in seen for cd in row_data):
+            try:
+                li, _, _ = select_source(t, rows, sources, legacy, letter)
+            except ValueError as exc:
+                die(str(exc))
+            if li is not None:
                 candidates.append((i, t))
         if len(candidates) != 1:
             names = [f"{tab_letter(i)} ({t['title']})" for i, t in candidates] or ["none"]
@@ -746,25 +865,29 @@ def main():
         pos, _ = candidates[0]
 
     tab = tabs[pos]
-    letter = letter_arg or tab_letter(pos)
+    letter = letter_arg or tab["title"].strip().upper().removeprefix("DAY ")
+    if letter not in LETTERS:
+        die("selected tab has no unambiguous A/B/C letter")
     rows = values[tab["sheetId"]]
     if not rows:
         die(f"tab {letter} is empty")
-    groups = group_columns_for_rows(rows)
-    row_idx = last_logged_row(rows, groups)
+    target = note_dir_for(override_date, letter) / "index.md" if override_date else None
+    if args.force and target is None:
+        die("--force requires an explicit plan date")
+    try:
+        row_idx, groups, source = select_source(tab, rows, sources, legacy, letter, target if args.force else None)
+    except ValueError as exc:
+        die(str(exc))
     if row_idx is None:
-        die(f"tab {letter} has no logged rows")
-    if not args.force:
-        row_data = row_logged_cells(rows[row_idx], groups)
-        if row_data and any(normalize(cd) in seen for cd in row_data):
-            die(
-                f"last logged row in tab {letter} (row {row_idx}) is already present in an "
-                f"existing note — log the new workout first or pass --force"
-            )
+        die(f"tab {letter} has no unimported workout")
+    if not row_logged_group_count(rows[row_idx], groups):
+        die(f"Google Sheets row {row_idx + 1}, date {source['workout_date']}: waiting for logged results")
+    if target and target.exists():
+        assigned = next((key for key, path in sources.items() if path == target), None)
+        if assigned != source_key(source):
+            die("target has different/unmapped source; resolve metadata explicitly before --force")
 
     note_date = override_date or sheet_date(rows, row_idx)
-    if note_date is None and pos != 0:
-        note_date = sheet_date(values[tabs[0]["sheetId"]], row_idx)
     if note_date is None:
         die("cannot resolve the note date from the sheet — rerun with DD.MM.YYYY")
 
@@ -772,15 +895,11 @@ def main():
     if not exercises:
         die("selected row has no exercise cells")
 
-    note_dir = note_dir_for(note_date, letter)
-    note_path = note_dir / "index.md"
-    if note_path.exists() and not args.force:
-        die(f"{note_path} already exists — rerun with --force to overwrite")
-    note_dir.mkdir(parents=True, exist_ok=True)
-    note_path.write_text(build_note(note_date, letter, exercises), encoding="utf-8")
-    save_posters(exercises, note_dir)
-
-    print(f"created {note_path.relative_to(ROOT)}")
+    try:
+        note_dir = write_note(note_date, letter, exercises, source, args.force)
+    except ValueError as exc:
+        die(str(exc))
+    print(f"created {note_dir.relative_to(ROOT)} (Google Sheets row {row_idx + 1}, date {source['workout_date']})")
     for n, (heading, _, comment, link) in enumerate(exercises, 1):
         marks = []
         if comment:
@@ -791,4 +910,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    with (CONFIG_DIR / "import.lock").open("w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            die("another gym-note process is running; retry after it finishes")
+        main()

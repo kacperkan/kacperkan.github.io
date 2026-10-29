@@ -2,6 +2,7 @@
 title: 17.10.2026 – B
 date: 2026-10-21
 math: true
+gym_source: {"spreadsheet_id": "1_gY7HDCl0Mk4HNphcVax3jhlz4TIJwIgze562q0i9Vs", "sheet_id": 239520949, "workout_date": "2026-10-21"}
 tags:
     - Gym
 ---
@@ -29,7 +30,7 @@ tags:
 
 4. Ściąganie drążka nachwytem 4x8
 {{<
-    exercise cell_data="45/55/65/75 (8/8/8/8/ <10/8/3/2> [4x8]"
+    exercise cell_data="45/55/65/75 (8/8/8/8) <10/8/3/2> [4x8]"
     comment=""
     link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/17.10.2026/B/4.mp4"
 >}}

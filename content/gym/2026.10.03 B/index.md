@@ -2,6 +2,7 @@
 title: 03.10.2026 – B
 date: 2026-10-08
 math: true
+gym_source: {"spreadsheet_id": "1_gY7HDCl0Mk4HNphcVax3jhlz4TIJwIgze562q0i9Vs", "sheet_id": 239520949, "workout_date": "2026-10-07"}
 tags:
     - Gym
 ---
