@@ -62,7 +62,7 @@ ROOT = Path(__file__).resolve().parent.parent
 GYM_DIR = ROOT / "content" / "gym"
 PCLOUD_ROOT = "https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts"
 
-LINK_RE = re.compile(r"@([^@]+)@")
+LINK_RE = re.compile(r"@([^@\s]+?)(?:@|(?=\s|$))")
 COMMENT_RE = re.compile(r"\{([^}]*)\}")
 LOGGED_RE = re.compile(r"^\d[\d.,/]*\s*\(")
 SHEET_DATE_RE = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$")
@@ -154,6 +154,11 @@ def clean_name(name):
     return normalize(re.sub(r"\s*\[[^\]]*\]", " ", name))
 
 
+def has_workout_data(raw):
+    rest = ANNOTATION_RE.sub("", raw).strip()
+    return bool(rest) and not HELPER_RE.fullmatch(rest)
+
+
 def polish_weights(weights):
     return " ".join(w.replace(".", ",") for w in weights)
 
@@ -185,7 +190,7 @@ def extract_exercises(rows, row_idx, groups, note_date, letter):
     video_root = f"{PCLOUD_ROOT}/{note_date:%d.%m.%Y}/{letter}"
     for name, cols in groups:
         raw_cells = [cell(rows[row_idx], c) for c in cols if cell(rows[row_idx], c).strip()]
-        if not raw_cells:
+        if not any(has_workout_data(rc) for rc in raw_cells):
             continue
         parsed = [parse_cell(rc) for rc in raw_cells]
         main = next((p for p in parsed if LOGGED_RE.match(p[0])), None)
@@ -194,7 +199,9 @@ def extract_exercises(rows, row_idx, groups, note_date, letter):
         helper = next((p[0] for p in parsed if p is not main and HELPER_RE.match(p[0])), None)
         comments = [c for p in parsed for c in p[1]]
         links = [
-            f"{video_root}/{quote(link)}.mp4" if re.fullmatch(r"[\w-]+", link) else link
+            f"{video_root}/{quote(link.removesuffix('a') if re.fullmatch(r'\d+a', link) else link)}.mp4"
+            if re.fullmatch(r"[\w-]+", link)
+            else link
             for p in parsed for link in p[2]
         ]
         sets = SETS_RE.match(main[0])
@@ -275,7 +282,7 @@ def select_source(tab, rows, sources, legacy, letter, target=None):
     dates = set()
     for i, row in enumerate(rows[1:], 1):
         ready = any(str(cell(row, c)).strip().upper() == "TRUE" for c, name in enumerate(rows[0]) if name.strip().removesuffix("?").strip().casefold() == "gotowe")
-        if not ready and not any(str(value).strip() for value in row[:1]) and not any(cell(row, c).strip() for _, cols in groups for c in cols):
+        if not ready and not any(str(value).strip() for value in row[:1]) and not any(has_workout_data(cell(row, c)) for _, cols in groups for c in cols):
             continue
         try:
             date = sheet_date(rows, i)
