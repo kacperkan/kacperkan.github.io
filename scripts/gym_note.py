@@ -734,12 +734,6 @@ def print_status():
             print("last sync snapshot: unreadable")
     else:
         print("last sync snapshot: unavailable (no sync recorded by this version)")
-    if LOG_PATH.exists():
-        lines = LOG_PATH.read_text(encoding="utf-8", errors="replace").splitlines()
-        if lines:
-            print(f"historical log (not live; {LOG_PATH}):")
-            for line in lines[-6:]:
-                print(f"  {line}")
 
 
 def main():
@@ -906,6 +900,10 @@ def main():
         note_dir = write_note(note_date, letter, exercises, source, args.force)
     except ValueError as exc:
         die(str(exc))
+    queued = load_queue()
+    remaining = [d for d in queued if not all(note_exists(d, l) for l in LETTERS)]
+    if len(remaining) != len(queued):
+        save_queue(remaining)
     print(f"created {note_dir.relative_to(ROOT)} (Google Sheets row {row_idx + 1}, date {source['workout_date']})")
     for n, (heading, _, comment, link) in enumerate(exercises, 1):
         marks = []

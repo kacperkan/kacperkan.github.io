@@ -63,7 +63,7 @@ Queue a training week's plan date (`DD.MM.YYYY`) to automatically pull and publi
 # Queue a week date (installs/activates the macOS launchd agent and checks immediately)
 pixi run gym-queue 10.10.2026
 
-# Check queue status, A/B/C progress, launchd state, and recent sync log
+# Check queue status, A/B/C progress, launchd state, and last sync snapshot
 pixi run gym-status
 
 # Manually run a queue check & publish pass right now
