@@ -369,8 +369,10 @@ def get_credentials(creds_path):
                     "OAuth client in the Google Cloud console (Sheets API and "
                     "Drive API enabled) and save its JSON there."
                 )
+            if not sys.stdin.isatty():
+                die("OAuth token missing or expired; run interactively (e.g. pixi run gym-sync) to re-authenticate")
             flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), SCOPES)
-            creds = flow.run_local_server(port=0)
+            creds = flow.run_local_server(port=0, timeout_seconds=120)
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
         token_path.write_text(creds.to_json(), encoding="utf-8")
     return creds
@@ -782,11 +784,19 @@ def main():
         help="OAuth client JSON (default: %(default)s)",
     )
     args = ap.parse_args()
-
     if args.status:
         print_status()
         return
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    with (CONFIG_DIR / "import.lock").open("w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            die("another gym-note process is running; retry after it finishes")
+        dispatch(args)
 
+
+def dispatch(args):
     if args.unqueue:
         to_remove = [parse_date_str(t) for t in args.selector]
         if not to_remove or any(d is None for d in to_remove):
@@ -915,10 +925,4 @@ def main():
 
 
 if __name__ == "__main__":
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    with (CONFIG_DIR / "import.lock").open("w") as lock:
-        try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            die("another gym-note process is running; retry after it finishes")
-        main()
+    main()
