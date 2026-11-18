@@ -62,7 +62,7 @@ ROOT = Path(__file__).resolve().parent.parent
 GYM_DIR = ROOT / "content" / "gym"
 PCLOUD_ROOT = "https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts"
 
-LINK_RE = re.compile(r"@([^@\s]+?)(?:@|(?=\s|$))")
+LINK_RE = re.compile(r"@([^@\s,|]+(?:\s*[,|]\s*[^@\s,|]+)*(?:\s*[,|])*)(?:@|(?=\s|$))")
 COMMENT_RE = re.compile(r"\{([^}]*)\}")
 LOGGED_RE = re.compile(r"^\d[\d.,/]*\s*\(")
 SHEET_DATE_RE = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$")
@@ -93,7 +93,7 @@ def ensure_dot(text):
 
 def parse_cell(raw):
     """Split a raw sheet cell into (cell_data, comments, links)."""
-    links = [l.strip() for l in LINK_RE.findall(raw) if l.strip()]
+    links = [item.strip() for m in LINK_RE.findall(raw) for item in re.split(r"[,|]", m) if item.strip()]
     comments = [ensure_dot(c.strip()) for c in COMMENT_RE.findall(raw) if c.strip()]
     rest = COMMENT_RE.sub(" ", LINK_RE.sub(" ", raw))
     rest = re.sub(r"\s+", " ", rest).strip()

@@ -18,7 +18,7 @@ tags:
 {{<
     exercise cell_data="70/85/100/115/125/135/145/155/160 (2/2/2/2/2/2/2/2/2) <10/10/10/10/8/6/5/2/1>"
     comment="A spróbowałem sobie jeszcze 160, nawet zapas był mimo że dzisiaj bez butów, bo zapomniałem 😅."
-    link_data="2,3"
+    link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/15.11.2026/B/2.mp4, https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/15.11.2026/B/3.mp4"
 >}}
 
 3. Wyciskanie sztangi na skosie 40 47,5 55 60 65 70 75 80x2
