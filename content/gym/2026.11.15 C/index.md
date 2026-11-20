@@ -44,7 +44,7 @@ tags:
 
 6. Rumuński martwy ciąg 70 80 90 100 110 120x4
 {{<
-    exercise cell_data="70/80/90/100/110/120 (4/4/4/4/4/4) <10/10/10/7/4>"
+    exercise cell_data="70/80/90/100/110/120 (4/4/4/4/4/4) <10/10/10/8/7/4>"
     comment=""
     link_data="https://filedn.com/lz7874DJjR0p3iQYiKf4iuF/Workouts/15.11.2026/C/7.mp4"
 >}}
